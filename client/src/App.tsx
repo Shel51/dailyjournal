@@ -15,6 +15,7 @@ function Router() {
       <Route path="/" component={HomePage} />
       <Route path="/journal/:id" component={JournalDetail} />
       <ProtectedRoute path="/new" component={NewEntry} />
+      <ProtectedRoute path="/today" component={NewEntry} />
       <Route component={NotFound} />
     </Switch>
   );

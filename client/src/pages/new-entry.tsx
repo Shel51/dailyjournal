@@ -4,25 +4,27 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { type InsertJournal } from "@shared/schema";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function NewEntry() {
   const { user } = useAuth();
-  const [_, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const isToday = location === "/today";
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertJournal) => {
       await apiRequest("POST", "/api/journals", data);
     },
     onSuccess: () => {
-      setLocation("/feed");
+      setLocation("/");
     },
   });
 
-  if (!user?.isAdmin) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-lg text-muted-foreground">
-          You don't have permission to create new entries.
+          Please log in to create journal entries.
         </p>
       </div>
     );
@@ -30,10 +32,18 @@ export default function NewEntry() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">New Journal Entry</h1>
-        <JournalEditor onSubmit={async (data) => await createMutation.mutateAsync(data)} />
-      </div>
+      <Card className="max-w-3xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-3xl font-serif">
+            {isToday ? "Today's Thoughts" : "New Journal Entry"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <JournalEditor 
+            onSubmit={async (data) => await createMutation.mutateAsync(data)} 
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
