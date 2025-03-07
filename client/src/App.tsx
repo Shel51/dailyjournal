@@ -5,8 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/use-auth";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
-import AuthPage from "@/pages/auth-page";
-import JournalFeed from "@/pages/journal-feed";
 import JournalDetail from "@/pages/journal-detail";
 import NewEntry from "@/pages/new-entry";
 import { ProtectedRoute } from "./lib/protected-route";
@@ -15,8 +13,6 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
-      <Route path="/auth" component={AuthPage} />
-      <Route path="/feed" component={JournalFeed} />
       <Route path="/journal/:id" component={JournalDetail} />
       <ProtectedRoute path="/new" component={NewEntry} />
       <Route component={NotFound} />
