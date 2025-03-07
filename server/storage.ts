@@ -1,20 +1,13 @@
-export interface IStorage {
-  sessionStore: import("express-session").Store;
-  getUser(id: number): Promise<import("@shared/schema").User | undefined>;
-  getUserByUsername(username: string): Promise<import("@shared/schema").User | undefined>;
-  createUser(user: import("@shared/schema").InsertUser): Promise<import("@shared/schema").User>;
-  createJournal(journal: import("@shared/schema").InsertJournal & { authorId: number }): Promise<import("@shared/schema").Journal>;
-  getJournal(id: number): Promise<import("@shared/schema").Journal | undefined>;
-  getAllJournals(): Promise<import("@shared/schema").Journal[]>;
-  createComment(comment: import("@shared/schema").InsertComment & { authorId: number }): Promise<import("@shared/schema").Comment>;
-  getCommentsByJournalId(journalId: number): Promise<import("@shared/schema").Comment[]>;
-  addLike(journalId: number, ipAddress: string): Promise<void>;
-  searchJournals(query: string): Promise<import("@shared/schema").Journal[]>;
-}
-
-import createMemoryStore from "memorystore";
+import { IStorage } from "./storage";
 import session from "express-session";
+import { db } from "./db";
+import { eq, sql } from "drizzle-orm";
+import connectPg from "connect-pg-simple";
 import {
+  users,
+  journals,
+  comments,
+  likes,
   type User,
   type Journal,
   type Comment,
@@ -24,111 +17,102 @@ import {
   type InsertComment,
 } from "@shared/schema";
 
-const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private journals: Map<number, Journal>;
-  private comments: Map<number, Comment>;
-  private likes: Map<number, Like>;
+export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
-  currentId: { [key: string]: number };
 
   constructor() {
-    this.users = new Map();
-    this.journals = new Map();
-    this.comments = new Map();
-    this.likes = new Map();
-    this.currentId = { users: 1, journals: 1, comments: 1, likes: 1 };
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000,
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL not set");
+    }
+    this.sessionStore = new PostgresSessionStore({
+      conObject: {
+        connectionString: process.env.DATABASE_URL,
+      },
+      createTableIfMissing: true,
     });
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentId.users++;
-    const user: User = { ...insertUser, id, isAdmin: false };
-    this.users.set(id, user);
+  async createUser(insertUser: InsertUser & { isAdmin?: boolean }): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async createJournal(insertJournal: InsertJournal & { authorId: number }): Promise<Journal> {
-    const id = this.currentId.journals++;
-    const journal: Journal = {
-      ...insertJournal,
-      id,
-      createdAt: new Date(),
-      likeCount: 0,
-    };
-    this.journals.set(id, journal);
+    const [journal] = await db.insert(journals).values(insertJournal).returning();
     return journal;
   }
 
   async getJournal(id: number): Promise<Journal | undefined> {
-    return this.journals.get(id);
+    const [journal] = await db.select().from(journals).where(eq(journals.id, id));
+    return journal;
   }
 
   async getAllJournals(): Promise<Journal[]> {
-    return Array.from(this.journals.values()).sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-    );
+    return await db
+      .select()
+      .from(journals)
+      .orderBy(sql`${journals.createdAt} DESC`)
+      .execute();
   }
 
   async createComment(insertComment: InsertComment & { authorId: number }): Promise<Comment> {
-    const id = this.currentId.comments++;
-    const comment: Comment = {
-      ...insertComment,
-      id,
-      createdAt: new Date(),
-    };
-    this.comments.set(id, comment);
+    const [comment] = await db.insert(comments).values(insertComment).returning();
     return comment;
   }
 
   async getCommentsByJournalId(journalId: number): Promise<Comment[]> {
-    return Array.from(this.comments.values())
-      .filter((comment) => comment.journalId === journalId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return await db
+      .select()
+      .from(comments)
+      .where(eq(comments.journalId, journalId))
+      .orderBy(sql`${comments.createdAt} DESC`)
+      .execute();
   }
 
   async addLike(journalId: number, ipAddress: string): Promise<void> {
     if (!ipAddress) return;
 
-    const existing = Array.from(this.likes.values()).find(
-      (like) => like.journalId === journalId && like.ipAddress === ipAddress,
-    );
-    if (existing) return;
+    const [existingLike] = await db
+      .select()
+      .from(likes)
+      .where(eq(likes.journalId, journalId))
+      .where(eq(likes.ipAddress, ipAddress))
+      .execute();
 
-    const id = this.currentId.likes++;
-    this.likes.set(id, { id, journalId, ipAddress });
+    if (existingLike) return;
 
-    const journal = await this.getJournal(journalId);
-    if (journal) {
-      journal.likeCount++;
-      this.journals.set(journalId, journal);
-    }
+    await db.insert(likes).values({ journalId, ipAddress });
+
+    // Update like count using a subquery
+    await db
+      .update(journals)
+      .set({
+        likeCount: sql`(SELECT COUNT(*) FROM ${likes} WHERE ${likes.journalId} = ${journalId})`
+      })
+      .where(eq(journals.id, journalId));
   }
 
   async searchJournals(query: string): Promise<Journal[]> {
-    const lowercaseQuery = query.toLowerCase();
-    return Array.from(this.journals.values())
-      .filter(
-        (journal) =>
-          journal.title.toLowerCase().includes(lowercaseQuery) ||
-          journal.content.toLowerCase().includes(lowercaseQuery),
-      )
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    const searchQuery = `%${query.toLowerCase()}%`;
+    return await db
+      .select()
+      .from(journals)
+      .where(sql`LOWER(title) LIKE ${searchQuery} OR LOWER(content) LIKE ${searchQuery}`)
+      .orderBy(sql`${journals.createdAt} DESC`)
+      .execute();
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

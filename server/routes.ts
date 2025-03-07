@@ -3,9 +3,52 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { insertJournalSchema, insertCommentSchema } from "@shared/schema";
+import { hashPassword } from "./auth"; // Import hashPassword function
+
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
+
+  // Create seed data route
+  app.post("/api/seed", async (_req, res) => {
+    try {
+      // Create admin user
+      const admin = await storage.createUser({
+        username: "admin",
+        password: await hashPassword("admin123"),
+        isAdmin: true
+      });
+
+      // Create sample journal entries
+      const entries = [
+        {
+          title: "The Joy of Writing",
+          content: "Today I discovered the therapeutic effects of journaling. Writing down my thoughts helps clear my mind and brings a sense of peace.",
+          imageUrl: "https://images.unsplash.com/photo-1455390582262-044cdead277a",
+          authorId: admin.id
+        },
+        {
+          title: "A Walk in Nature",
+          content: "Spent the morning walking through the local park. The fresh air and gentle breeze reminded me of the simple pleasures in life.",
+          imageUrl: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
+          authorId: admin.id
+        },
+        {
+          title: "Reflections on Growth",
+          content: "Looking back at the past year, I'm amazed by how much has changed. Every challenge has been an opportunity to learn and grow.",
+          authorId: admin.id
+        }
+      ];
+
+      for (const entry of entries) {
+        await storage.createJournal(entry);
+      }
+
+      res.json({ message: "Seed data created successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Error creating seed data" });
+    }
+  });
 
   // Journal routes
   app.get("/api/journals", async (_req, res) => {
