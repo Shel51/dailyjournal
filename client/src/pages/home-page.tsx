@@ -26,14 +26,14 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-16">
-        <div className="max-w-3xl mx-auto text-center mb-16">
+        <div className="max-w-2xl mx-auto text-center mb-16">
           <h1 className="text-4xl font-bold mb-4">My Daily Journal</h1>
           <p className="text-xl text-muted-foreground">
             Welcome to my personal space where I share my thoughts, experiences, and reflections.
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="max-w-2xl mx-auto space-y-8">
           {journals.map((journal) => (
             <JournalCard
               key={journal.id}
