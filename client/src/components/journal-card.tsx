@@ -2,7 +2,7 @@ import { type Journal } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { Heart, MessageCircle } from "lucide-react";
-import { useLocation, NavigateFunction } from "wouter";
+import { useLocation } from "wouter";
 
 type JournalCardProps = {
   journal: Journal;
@@ -11,7 +11,7 @@ type JournalCardProps = {
 };
 
 export function JournalCard({ journal, commentsCount, onLike }: JournalCardProps) {
-  const [_, navigate] = useLocation() as [string, NavigateFunction];
+  const [_, navigate] = useLocation();
 
   return (
     <Card 
