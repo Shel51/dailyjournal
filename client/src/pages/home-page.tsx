@@ -36,10 +36,10 @@ export default function HomePage() {
           <p className="text-xl text-muted-foreground mb-8">
             Welcome to my personal space where I share my thoughts, experiences, and reflections.
           </p>
-          {user && (
-            <Button asChild className="bg-primary hover:bg-primary/90">
+          {user?.isAdmin && (
+            <Button asChild className="bg-primary hover:bg-primary/90 text-2xl font-bold p-4 rounded-lg">
               <Link href="/today">
-                <PencilLine className="mr-2 h-4 w-4" />
+                <PencilLine className="mr-2 h-6 w-6" />
                 Today's thought
               </Link>
             </Button>
