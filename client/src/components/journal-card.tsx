@@ -30,11 +30,13 @@ export function JournalCard({ journal, commentsCount, onLike }: JournalCardProps
         </p>
 
         {journal.imageUrl && (
-          <img
-            src={journal.imageUrl}
-            alt={journal.title}
-            className="w-full aspect-video object-cover rounded-md mb-6"
-          />
+          <div className="max-w-[300px] mb-6">
+            <img
+              src={journal.imageUrl}
+              alt={journal.title}
+              className="w-full aspect-video object-cover rounded-md"
+            />
+          </div>
         )}
 
         <div className="flex items-center gap-6 text-sm text-muted-foreground" onClick={(e) => e.stopPropagation()}>
