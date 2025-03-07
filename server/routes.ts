@@ -19,24 +19,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isAdmin: true
       });
 
-      // Create sample journal entries
+      // Create sample journal entries with different dates
       const entries = [
         {
-          title: "The Joy of Writing",
-          content: "Today I discovered the therapeutic effects of journaling. Writing down my thoughts helps clear my mind and brings a sense of peace.",
-          imageUrl: "https://images.unsplash.com/photo-1455390582262-044cdead277a",
-          authorId: admin.id
+          title: "Today's Reflection",
+          content: "Today was a productive day filled with coding and learning.",
+          imageUrl: "https://images.unsplash.com/photo-1516116216624-53e697fedbea",
+          authorId: admin.id,
+          createdAt: new Date()
         },
         {
-          title: "A Walk in Nature",
-          content: "Spent the morning walking through the local park. The fresh air and gentle breeze reminded me of the simple pleasures in life.",
-          imageUrl: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
-          authorId: admin.id
+          title: "Yesterday's Adventures",
+          content: "Spent yesterday exploring new technologies and frameworks.",
+          imageUrl: "https://images.unsplash.com/photo-1499750310107-5fef28a66643",
+          authorId: admin.id,
+          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000) // 1 day ago
         },
         {
-          title: "Reflections on Growth",
-          content: "Looking back at the past year, I'm amazed by how much has changed. Every challenge has been an opportunity to learn and grow.",
-          authorId: admin.id
+          title: "Last Week's Progress",
+          content: "Looking back at last week's achievements and lessons learned.",
+          imageUrl: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8",
+          authorId: admin.id,
+          createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // 7 days ago
+        },
+        {
+          title: "Beginning of the Month",
+          content: "Starting fresh with new goals and aspirations.",
+          authorId: admin.id,
+          createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // 30 days ago
         }
       ];
 
