@@ -2,7 +2,7 @@ import { type Journal } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { Heart, MessageCircle } from "lucide-react";
-import { Link } from "wouter";
+import { useLocation, NavigateFunction } from "wouter";
 
 type JournalCardProps = {
   journal: Journal;
@@ -11,21 +11,22 @@ type JournalCardProps = {
 };
 
 export function JournalCard({ journal, commentsCount, onLike }: JournalCardProps) {
+  const [_, navigate] = useLocation() as [string, NavigateFunction];
+
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card 
+      className="hover:shadow-lg transition-shadow cursor-pointer"
+      onClick={() => navigate(`/journal/${journal.id}`)}
+    >
       <CardHeader>
-        <CardTitle>
-          <Link href={`/journal/${journal.id}`} className="hover:underline">
-            {journal.title}
-          </Link>
-        </CardTitle>
+        <CardTitle>{journal.title}</CardTitle>
         <p className="text-sm text-muted-foreground">
           {format(new Date(journal.createdAt), "MMMM d, yyyy")}
         </p>
       </CardHeader>
       <CardContent>
         <p className="line-clamp-3 text-sm mb-4">{journal.content}</p>
-        
+
         {journal.imageUrl && (
           <img
             src={journal.imageUrl}
@@ -34,7 +35,7 @@ export function JournalCard({ journal, commentsCount, onLike }: JournalCardProps
           />
         )}
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={onLike}
             className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
@@ -42,7 +43,7 @@ export function JournalCard({ journal, commentsCount, onLike }: JournalCardProps
             <Heart className="h-4 w-4" />
             <span>{journal.likeCount}</span>
           </button>
-          
+
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <MessageCircle className="h-4 w-4" />
             <span>{commentsCount}</span>
