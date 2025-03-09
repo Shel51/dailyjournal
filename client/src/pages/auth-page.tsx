@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema } from "@shared/schema";
 import { useLocation } from "wouter";
 import { auth, googleProvider } from "@/lib/firebase";
-import { signInWithPopup, getAuth } from "firebase/auth";
+import { signInWithRedirect, getRedirectResult, getAuth } from "firebase/auth";
 import {
   Card,
   CardContent,
@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SiGoogle } from "react-icons/si";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import React from 'react';
 
 export default function AuthPage() {
   const [_, setLocation] = useLocation();
@@ -48,68 +49,81 @@ export default function AuthPage() {
     },
   });
 
+  // Check for redirect result on component mount
+  React.useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          console.log('Got redirect result:', result);
+          const idToken = await result.user.getIdToken();
+
+          console.log('Sending token to backend...');
+          const response = await fetch('/api/auth/google', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token: idToken }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to authenticate with the server');
+          }
+
+          const userData = await response.json();
+          console.log('Authentication successful:', userData);
+
+          toast({
+            title: "Success",
+            description: "Successfully signed in with Google",
+          });
+
+          setLocation("/");
+        }
+      } catch (error: any) {
+        console.error('Redirect result error:', error);
+        handleAuthError(error);
+      }
+    };
+
+    handleRedirectResult();
+  }, []);
+
   const handleGoogleSignIn = async () => {
     try {
       console.log('Starting Google sign-in process...');
-      // Configure popup settings
-      const auth = getAuth();
-      auth.languageCode = 'en';
-
-      // Log current domain information
       console.log('Current domain:', window.location.hostname);
       console.log('Current URL:', window.location.href);
 
-      const result = await signInWithPopup(auth, googleProvider);
-      console.log('Google sign-in successful, getting ID token...');
-      const idToken = await result.user.getIdToken();
-
-      console.log('Sending token to backend...');
-      const response = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: idToken }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to authenticate with the server');
-      }
-
-      const userData = await response.json();
-      console.log('Authentication successful:', userData);
-
-      toast({
-        title: "Success",
-        description: "Successfully signed in with Google",
-      });
-
-      setLocation("/");
+      await signInWithRedirect(auth, googleProvider);
     } catch (error: any) {
       console.error('Google sign-in error:', error);
-      let errorMessage = 'Failed to sign in with Google';
-
-      // Handle specific Firebase auth errors
-      if (error.code === 'auth/unauthorized-domain') {
-        errorMessage = 'This domain is not authorized for sign-in. Please try again in a moment.';
-        console.error('Domain not authorized. Please ensure the following domains are added to Firebase Console:',
-          '\n- journal.shally.repl.co',
-          '\n- *.repl.co');
-      } else if (error.code === 'auth/popup-closed-by-user') {
-        errorMessage = 'Sign-in was cancelled. Please try again.';
-      } else if (error.code === 'auth/cancelled-popup-request') {
-        errorMessage = 'Another sign-in attempt is in progress. Please wait.';
-      } else if (error.code === 'auth/configuration-not-found') {
-        errorMessage = 'Firebase configuration error. Please try again later.';
-        console.error('Firebase configuration error. Please check your Firebase config settings.');
-      }
-
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
+      handleAuthError(error);
     }
+  };
+
+  const handleAuthError = (error: any) => {
+    let errorMessage = 'Failed to sign in with Google';
+
+    if (error.code === 'auth/unauthorized-domain') {
+      errorMessage = 'This domain is not authorized for sign-in. Please try again in a moment.';
+      console.error('Domain not authorized. Please ensure the following domains are added to Firebase Console:',
+        '\n- journal.shally.repl.co',
+        '\n- *.repl.co',
+        '\nCurrent domain:', window.location.hostname);
+    } else if (error.code === 'auth/cancelled-popup-request') {
+      errorMessage = 'Another sign-in attempt is in progress. Please wait.';
+    } else if (error.code === 'auth/configuration-not-found') {
+      errorMessage = 'Firebase configuration error. Please try again later.';
+      console.error('Firebase configuration error. Please check your Firebase config settings.');
+    }
+
+    toast({
+      title: "Error",
+      description: errorMessage,
+      variant: "destructive",
+    });
   };
 
   if (user) {
