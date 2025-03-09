@@ -115,10 +115,11 @@ export default function JournalDetail() {
           <Button
             variant="ghost"
             size="sm"
-            className="flex items-center gap-1"
+            className="flex items-center gap-1.5 hover:text-primary transition-colors"
             onClick={() => likeMutation.mutate()}
+            disabled={likeMutation.isPending}
           >
-            <Heart className="h-4 w-4" />
+            <Heart className={`h-4 w-4 ${likeMutation.isPending ? 'animate-pulse' : ''}`} />
             <span>{journal.likeCount}</span>
           </Button>
         </div>
@@ -136,6 +137,7 @@ export default function JournalDetail() {
             <p key={index} className="text-base md:text-lg">{paragraph}</p>
           ))}
         </div>
+
         {journal.videoUrl && (
           <div className="w-full max-w-3xl mx-auto mb-8">
             <div className="relative w-full aspect-video">
@@ -152,6 +154,7 @@ export default function JournalDetail() {
             </div>
           </div>
         )}
+
         {journal.refUrl && (
           <div className="mt-4 flex items-center gap-2 text-sm mb-8">
             <LinkIcon className="h-4 w-4 text-muted-foreground" />
@@ -165,7 +168,9 @@ export default function JournalDetail() {
             </a>
           </div>
         )}
+
         <hr className="my-8 md:my-12" />
+
         <CommentSection
           comments={comments}
           journalId={journal.id}
