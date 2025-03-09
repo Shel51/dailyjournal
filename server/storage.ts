@@ -151,15 +151,18 @@ export class DatabaseStorage implements IStorage {
   async addLike(journalId: number, ipAddress: string): Promise<void> {
     if (!ipAddress) return;
 
-    const [existingLike] = await db
+    // Check if the user has already liked this journal
+    const existingLike = await db
       .select()
       .from(likes)
-      .where(eq(likes.journalId, journalId))
-      .where(eq(likes.ipAddress, ipAddress))
+      .where(
+        sql`${likes.journalId} = ${journalId} AND ${likes.ipAddress} = ${ipAddress}`
+      )
       .execute();
 
-    if (existingLike) return;
+    if (existingLike.length > 0) return;
 
+    // Add the like
     await db.insert(likes).values({ journalId, ipAddress });
 
     // Update like count using a subquery
