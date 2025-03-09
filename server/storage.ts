@@ -47,34 +47,27 @@ export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
 
   constructor() {
-    console.log("Initializing DatabaseStorage...");
     if (!process.env.DATABASE_URL) {
       throw new Error("DATABASE_URL not set");
     }
 
     try {
-      console.log("Setting up PostgresSessionStore...");
       this.sessionStore = new PostgresSessionStore({
         pool: pool,
         tableName: 'session',
         createTableIfMissing: true,
         pruneSessionInterval: 60 * 60
       });
-      console.log("PostgresSessionStore initialized successfully");
     } catch (error) {
-      console.error("Failed to initialize PostgresSessionStore:", error);
       throw error;
     }
   }
 
   async getUser(id: number): Promise<User | undefined> {
     try {
-      console.log(`Fetching user with ID: ${id}`);
       const [user] = await db.select().from(users).where(eq(users.id, id));
-      console.log(`User fetch result:`, user ? 'Found' : 'Not found');
       return user;
     } catch (error) {
-      console.error('Error fetching user:', error);
       return undefined;
     }
   }
@@ -106,7 +99,6 @@ export class DatabaseStorage implements IStorage {
         .where(eq(journals.id, id));
       return result;
     } catch (error) {
-      console.error("Error in getJournal:", error);
       throw error;
     }
   }
@@ -119,7 +111,6 @@ export class DatabaseStorage implements IStorage {
         .orderBy(sql`${journals.createdAt} DESC`);
       return result;
     } catch (error) {
-      console.error("Error in getAllJournals:", error);
       throw error;
     }
   }
@@ -168,7 +159,6 @@ export class DatabaseStorage implements IStorage {
     }
 
     const result = await db.transaction(async (tx) => {
-      // Get current journal state
       const [journal] = await tx
         .select()
         .from(journals)
@@ -178,7 +168,6 @@ export class DatabaseStorage implements IStorage {
         throw new Error('Journal not found');
       }
 
-      // Check if already liked
       const [existingLike] = await tx
         .select()
         .from(likes)
@@ -192,7 +181,6 @@ export class DatabaseStorage implements IStorage {
         };
       }
 
-      // Add like and update count atomically
       await tx
         .insert(likes)
         .values({ journalId, ipAddress });
@@ -223,6 +211,7 @@ export class DatabaseStorage implements IStorage {
 
     return !!like;
   }
+
   async updateUserPassword(userId: number, newPassword: string): Promise<void> {
     await db
       .update(users)
@@ -269,11 +258,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteJournal(id: number): Promise<void> {
-    // First delete all comments associated with this journal
     await db.delete(comments).where(eq(comments.journalId, id));
-    // Then delete all likes associated with this journal
     await db.delete(likes).where(eq(likes.journalId, id));
-    // Finally delete the journal itself
     await db.delete(journals).where(eq(journals.id, id));
   }
 
@@ -295,7 +281,6 @@ export class DatabaseStorage implements IStorage {
         .where(eq(users.email, email));
       return user;
     } catch (error) {
-      console.error('Error fetching user by email:', error);
       return undefined;
     }
   }
