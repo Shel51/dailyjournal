@@ -54,7 +54,7 @@ export default function AuthPage() {
       <div className="flex items-center justify-center p-4 md:p-8">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-2xl md:text-3xl">Welcome to My Journal</CardTitle>
+            <CardTitle className="text-2xl md:text-3xl">Welcome to Shally's Journal</CardTitle>
             <CardDescription className="text-base md:text-lg">
               Sign in to continue or create a new account.
             </CardDescription>
