@@ -6,8 +6,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 
 interface TextToSpeechProps {
@@ -17,51 +15,18 @@ interface TextToSpeechProps {
 export function TextToSpeech({ text }: TextToSpeechProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [rate, setRate] = useState(1);
-  const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
-  const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [speech, setSpeech] = useState<SpeechSynthesisUtterance | null>(null);
-
-  // Initialize and update available voices
-  useEffect(() => {
-    function loadVoices() {
-      const voices = window.speechSynthesis.getVoices();
-      setAvailableVoices(voices);
-
-      // Try to find a good female voice
-      const preferredVoices = voices.filter(voice => 
-        voice.lang.startsWith('en') && 
-        voice.name.toLowerCase().includes('female')
-      );
-
-      // Set default voice preference
-      if (preferredVoices.length > 0) {
-        setSelectedVoice(preferredVoices[0]);
-      } else if (voices.length > 0) {
-        setSelectedVoice(voices[0]);
-      }
-    }
-
-    loadVoices();
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-
-    return () => {
-      window.speechSynthesis.onvoiceschanged = null;
-    };
-  }, []);
 
   useEffect(() => {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = rate;
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
     utterance.onend = () => setIsPlaying(false);
     setSpeech(utterance);
 
     return () => {
       window.speechSynthesis.cancel();
     };
-  }, [text, rate, selectedVoice]);
+  }, [text, rate]);
 
   const togglePlay = () => {
     if (isPlaying) {
@@ -89,14 +54,6 @@ export function TextToSpeech({ text }: TextToSpeechProps) {
         window.speechSynthesis.cancel();
         window.speechSynthesis.speak(speech);
       }
-    }
-  };
-
-  const changeVoice = (voice: SpeechSynthesisVoice) => {
-    setSelectedVoice(voice);
-    if (isPlaying) {
-      window.speechSynthesis.cancel();
-      setIsPlaying(false);
     }
   };
 
@@ -128,24 +85,10 @@ export function TextToSpeech({ text }: TextToSpeechProps) {
             className="gap-2 text-muted-foreground hover:text-foreground"
           >
             <Settings2 className="h-4 w-4" />
-            <span className="hidden sm:inline">Settings</span>
+            <span className="hidden sm:inline">Speed</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[220px]">
-          <DropdownMenuLabel>Voice Selection</DropdownMenuLabel>
-          {availableVoices.map((voice) => (
-            <DropdownMenuItem
-              key={voice.name}
-              onClick={() => changeVoice(voice)}
-              className={selectedVoice?.name === voice.name ? "bg-muted" : ""}
-            >
-              {voice.name}
-            </DropdownMenuItem>
-          ))}
-
-          <DropdownMenuSeparator />
-
-          <DropdownMenuLabel>Reading Speed</DropdownMenuLabel>
+        <DropdownMenuContent align="end">
           {speeds.map((speed) => (
             <DropdownMenuItem
               key={speed.value}
