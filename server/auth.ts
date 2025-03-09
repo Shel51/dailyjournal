@@ -16,13 +16,18 @@ declare global {
 }
 
 // Initialize Firebase Admin
-initializeApp({
-  credential: cert({
-    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  }),
-});
+try {
+  initializeApp({
+    credential: cert({
+      projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    }),
+  });
+  console.log('Firebase Admin initialized successfully');
+} catch (error) {
+  console.error('Error initializing Firebase Admin:', error);
+}
 
 const scryptAsync = promisify(scrypt);
 
@@ -32,7 +37,7 @@ export async function hashPassword(password: string) {
   return `${buf.toString("hex")}.${salt}`;
 }
 
-export async function comparePasswords(supplied: string, stored: string) {
+async function comparePasswords(supplied: string, stored: string) {
   const [hashed, salt] = stored.split(".");
   const hashedBuf = Buffer.from(hashed, "hex");
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
@@ -72,17 +77,27 @@ export function setupAuth(app: Express) {
   // Handle Google authentication
   app.post("/api/auth/google", async (req, res) => {
     try {
+      console.log('Received Google auth request');
       const { token } = req.body;
+
+      if (!token) {
+        console.error('No token provided');
+        return res.status(400).json({ error: 'No token provided' });
+      }
+
+      console.log('Verifying token with Firebase Admin');
       const decodedToken = await getAuth().verifyIdToken(token);
 
       if (!decodedToken.email) {
+        console.error('No email in decoded token');
         return res.status(400).json({ error: 'Email is required' });
       }
 
+      console.log('Looking up user by email:', decodedToken.email);
       let user = await storage.getUserByEmail(decodedToken.email);
 
       if (!user) {
-        // Create new user with email as username if not exists
+        console.log('Creating new user for email:', decodedToken.email);
         const username = decodedToken.email.split('@')[0];
         user = await storage.createUser({
           username,
@@ -97,11 +112,12 @@ export function setupAuth(app: Express) {
           console.error('Login error:', err);
           return res.status(500).json({ error: 'Failed to login' });
         }
+        console.log('User successfully logged in:', user.username);
         res.json(user);
       });
     } catch (error) {
       console.error('Google auth error:', error);
-      res.status(401).json({ error: 'Authentication failed' });
+      res.status(401).json({ error: error.message || 'Authentication failed' });
     }
   });
 
