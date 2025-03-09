@@ -135,22 +135,7 @@ export default function JournalDetail() {
           {journal.content.split("\n").map((paragraph, index) => (
             <p key={index} className="text-base md:text-lg">{paragraph}</p>
           ))}
-
-          {journal.refUrl && (
-            <div className="mt-4 flex items-center gap-2 text-sm">
-              <LinkIcon className="h-4 w-4 text-muted-foreground" />
-              <a 
-                href={journal.refUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                Reference Link
-              </a>
-            </div>
-          )}
         </div>
-
         {journal.videoUrl && (
           <div className="w-full max-w-3xl mx-auto mb-8">
             <div className="relative w-full aspect-video">
@@ -167,9 +152,20 @@ export default function JournalDetail() {
             </div>
           </div>
         )}
-
+        {journal.refUrl && (
+          <div className="mt-4 flex items-center gap-2 text-sm mb-8">
+            <LinkIcon className="h-4 w-4 text-muted-foreground" />
+            <a 
+              href={journal.refUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Reference Link
+            </a>
+          </div>
+        )}
         <hr className="my-8 md:my-12" />
-
         <CommentSection
           comments={comments}
           journalId={journal.id}
