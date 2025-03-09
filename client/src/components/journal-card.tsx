@@ -68,13 +68,13 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
       onClick={() => navigate(`/journal/${journal.id}`)}
     >
       <CardHeader className="pb-3">
-        <CardTitle className="text-xl md:text-2xl font-serif tracking-tight">{journal.title}</CardTitle>
+        <CardTitle className="text-xl md:text-2xl font-lora tracking-tight">{journal.title}</CardTitle>
         <p className="text-sm text-muted-foreground/80 font-medium">
           {format(new Date(journal.createdAt), "MMMM d, yyyy")}
         </p>
       </CardHeader>
       <CardContent>
-        <p className="line-clamp-3 text-base md:text-lg text-muted-foreground/90 leading-relaxed mb-6 font-normal">
+        <p className="line-clamp-3 text-[18px] font-merriweather text-muted-foreground/90 leading-[1.8] mb-6">
           {journal.content}
         </p>
 

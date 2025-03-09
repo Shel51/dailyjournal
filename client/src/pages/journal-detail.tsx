@@ -120,7 +120,7 @@ export default function JournalDetail() {
         <article className="max-w-3xl mx-auto px-5 md:px-7">
           <div className="mb-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif tracking-tight text-foreground">
+              <h1 className="text-2xl md:text-3xl lg:text-[24px] font-lora tracking-tight text-foreground">
                 {journal.title}
               </h1>
               {user?.isAdmin && (
@@ -185,7 +185,7 @@ export default function JournalDetail() {
 
             <div className="prose prose-lg max-w-none mb-12">
               {journal.content.split("\n").map((paragraph, index) => (
-                <p key={index} className="mb-6 text-lg md:text-xl text-foreground/90 leading-relaxed text-left px-3 md:px-5 font-normal">
+                <p key={index} className="mb-6 text-[18px] font-merriweather text-foreground/90 leading-[1.8] text-left px-3 md:px-5">
                   {paragraph}
                 </p>
               ))}

@@ -53,15 +53,24 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/10;
+    @apply bg-background text-foreground antialiased selection:bg-primary/10;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Custom Typography */
+  .font-lora {
+    font-family: "Lora", serif;
+  }
+
+  .font-merriweather {
+    font-family: "Merriweather", serif;
+  }
+
   /* Improved Typography */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif tracking-tight;
+    @apply font-lora tracking-tight;
   }
 
   /* Smooth Scrolling */
