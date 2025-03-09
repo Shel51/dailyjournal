@@ -111,13 +111,16 @@ export default function AuthPage() {
       console.error('Domain not authorized. Please ensure the following domains are added to Firebase Console:',
         '\n- journal.shally.repl.co',
         '\n- *.repl.co',
+        '\n- *.replit.dev',
+        '\n- *.worf.replit.dev',
         '\nCurrent domain:', window.location.hostname);
+    } else if (error.code === 'auth/configuration-not-found') {
+      errorMessage = 'Firebase configuration error. Please check your Firebase config settings.';
+      console.error('Firebase configuration error:', error);
     } else if (error.code === 'auth/cancelled-popup-request') {
       errorMessage = 'Another sign-in attempt is in progress. Please wait.';
-    } else if (error.code === 'auth/configuration-not-found') {
-      errorMessage = 'Firebase configuration error. Please try again later.';
-      console.error('Firebase configuration error. Please check your Firebase config settings.');
     }
+
 
     toast({
       title: "Error",

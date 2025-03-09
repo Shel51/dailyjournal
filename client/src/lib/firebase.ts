@@ -23,5 +23,15 @@ googleProvider.setCustomParameters({
 console.log('Firebase config:', {
   ...firebaseConfig,
   apiKey: '[HIDDEN]', // Don't log the API key
-  currentDomain: window.location.hostname
+  currentDomain: window.location.hostname,
+  authDomain: firebaseConfig.authDomain,
+  projectId: firebaseConfig.projectId
 });
+
+// Add detailed error checking for domain configuration
+if (!firebaseConfig.authDomain) {
+  console.error('Firebase authDomain is not configured properly');
+}
+if (!firebaseConfig.projectId) {
+  console.error('Firebase projectId is not configured properly');
+}
