@@ -8,7 +8,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 type JournalCardProps = {
-  journal: Journal & { hasLiked: boolean }; // Added hasLiked property
+  journal: Journal & { hasLiked: boolean };
   commentsCount: number;
 };
 
@@ -21,9 +21,16 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
       await apiRequest("POST", `/api/journals/${journal.id}/like`);
     },
     onSuccess: () => {
-      // Invalidate queries to trigger refetch
-      queryClient.invalidateQueries({ queryKey: [`/api/journals/${journal.id}`] });
-      queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
+      // Clear cache for all journal-related queries
+      queryClient.removeQueries({ queryKey: ["/api/journals"] });
+      queryClient.removeQueries({ queryKey: [`/api/journals/${journal.id}`] });
+
+      // Force immediate refetch
+      queryClient.refetchQueries({ 
+        queryKey: ["/api/journals"],
+        type: 'active',
+        exact: true,
+      });
     },
     onError: (error) => {
       toast({

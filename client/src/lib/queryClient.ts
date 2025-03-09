@@ -41,13 +41,15 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
+// Create and export the queryClient with updated configuration
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
-      refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      staleTime: 0, // Consider data stale immediately
+      cacheTime: 0, // Don't cache data
+      refetchOnMount: true, // Refetch on component mount
+      refetchOnWindowFocus: true, // Refetch when window gains focus
       retry: false,
     },
     mutations: {
@@ -55,3 +57,6 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+// Clear existing cache
+queryClient.clear();
