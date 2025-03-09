@@ -5,7 +5,6 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
-  email: text("email").unique(),  // Add email field
   password: text("password").notNull(),
   isAdmin: boolean("is_admin").notNull().default(false),
 });
@@ -39,7 +38,6 @@ export const comments = pgTable("comments", {
 // Create schemas for insert operations
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
-  email: true,    // Add email to schema
   password: true,
 });
 

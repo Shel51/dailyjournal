@@ -18,56 +18,38 @@ import {
 
 const PostgresSessionStore = connectPg(session);
 
-// Add email field to getUserByEmail interface
-export interface IStorage {
-  sessionStore: session.Store;
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(insertUser: InsertUser & { isAdmin?: boolean }): Promise<User>;
-  getAllUsers(): Promise<User[]>;
-  createJournal(insertJournal: InsertJournal & { authorId: number }): Promise<Journal>;
-  getJournal(id: number): Promise<Journal | undefined>;
-  getAllJournals(): Promise<Journal[]>;
-  createComment(insertComment: InsertComment & { authorId: number }): Promise<Comment>;
-  getCommentsByJournalId(journalId: number): Promise<Comment[]>;
-  getAllComments(): Promise<Comment[]>;
-  addLike(journalId: number, ipAddress: string): Promise<{ success: boolean; likeCount: number }>;
-  hasLiked(journalId: number, ipAddress: string): Promise<boolean>;
-  updateUserPassword(userId: number, newPassword: string): Promise<void>;
-  updateJournal(id: number, journal: InsertJournal & { authorId: number }): Promise<Journal>;
-  getComment(id: number): Promise<Comment | undefined>;
-  deleteComment(id: number): Promise<void>;
-  updateComment(id: number, data: { content: string }): Promise<Comment>;
-  deleteJournal(id: number): Promise<void>;
-  searchJournals(query: string): Promise<Journal[]>;
-}
-
 export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
 
   constructor() {
+    console.log("Initializing DatabaseStorage...");
     if (!process.env.DATABASE_URL) {
       throw new Error("DATABASE_URL not set");
     }
 
     try {
+      console.log("Setting up PostgresSessionStore...");
       this.sessionStore = new PostgresSessionStore({
         pool: pool,
         tableName: 'session',
         createTableIfMissing: true,
         pruneSessionInterval: 60 * 60
       });
+      console.log("PostgresSessionStore initialized successfully");
     } catch (error) {
+      console.error("Failed to initialize PostgresSessionStore:", error);
       throw error;
     }
   }
 
   async getUser(id: number): Promise<User | undefined> {
     try {
+      console.log(`Fetching user with ID: ${id}`);
       const [user] = await db.select().from(users).where(eq(users.id, id));
+      console.log(`User fetch result:`, user ? 'Found' : 'Not found');
       return user;
     } catch (error) {
+      console.error('Error fetching user:', error);
       return undefined;
     }
   }
@@ -99,6 +81,7 @@ export class DatabaseStorage implements IStorage {
         .where(eq(journals.id, id));
       return result;
     } catch (error) {
+      console.error("Error in getJournal:", error);
       throw error;
     }
   }
@@ -111,6 +94,7 @@ export class DatabaseStorage implements IStorage {
         .orderBy(sql`${journals.createdAt} DESC`);
       return result;
     } catch (error) {
+      console.error("Error in getAllJournals:", error);
       throw error;
     }
   }
@@ -153,12 +137,13 @@ export class DatabaseStorage implements IStorage {
       .execute();
   }
 
-  async addLike(journalId: number, ipAddress: string): Promise<{ success: boolean; likeCount: number }> {
+  async addLike(journalId: number, ipAddress: string): Promise<{ success: boolean, likeCount: number }> {
     if (!ipAddress) {
       throw new Error('IP address is required');
     }
 
     const result = await db.transaction(async (tx) => {
+      // Get current journal state
       const [journal] = await tx
         .select()
         .from(journals)
@@ -168,6 +153,7 @@ export class DatabaseStorage implements IStorage {
         throw new Error('Journal not found');
       }
 
+      // Check if already liked
       const [existingLike] = await tx
         .select()
         .from(likes)
@@ -181,6 +167,7 @@ export class DatabaseStorage implements IStorage {
         };
       }
 
+      // Add like and update count atomically
       await tx
         .insert(likes)
         .values({ journalId, ipAddress });
@@ -211,7 +198,6 @@ export class DatabaseStorage implements IStorage {
 
     return !!like;
   }
-
   async updateUserPassword(userId: number, newPassword: string): Promise<void> {
     await db
       .update(users)
@@ -258,8 +244,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteJournal(id: number): Promise<void> {
+    // First delete all comments associated with this journal
     await db.delete(comments).where(eq(comments.journalId, id));
+    // Then delete all likes associated with this journal
     await db.delete(likes).where(eq(likes.journalId, id));
+    // Finally delete the journal itself
     await db.delete(journals).where(eq(journals.id, id));
   }
 
@@ -271,18 +260,6 @@ export class DatabaseStorage implements IStorage {
       .where(sql`LOWER(title) LIKE ${searchQuery} OR LOWER(content) LIKE ${searchQuery}`)
       .orderBy(sql`${journals.createdAt} DESC`)
       .execute();
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    try {
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email));
-      return user;
-    } catch (error) {
-      return undefined;
-    }
   }
 }
 

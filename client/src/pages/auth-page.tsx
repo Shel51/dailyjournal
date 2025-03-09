@@ -21,12 +21,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+//import { Alert, AlertDescription } from "@/components/ui/alert"; // Removed import
+//import { Info } from "lucide-react"; // Removed import
 
 export default function AuthPage() {
   const [_, setLocation] = useLocation();
   const { user, loginMutation, registerMutation } = useAuth();
-  const { toast } = useToast();
 
   const loginForm = useForm({
     resolver: zodResolver(insertUserSchema),
@@ -60,7 +60,7 @@ export default function AuthPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login" className="space-y-4">
+            <Tabs defaultValue="register" className="space-y-4">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Register</TabsTrigger>
