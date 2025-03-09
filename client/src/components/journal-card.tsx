@@ -28,8 +28,6 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
     onSuccess: (data) => {
       setLocalLikeCount(data.likeCount);
       setLocalHasLiked(data.hasLiked);
-
-      // Invalidate queries
       queryClient.invalidateQueries({ 
         queryKey: ["/api/journals"],
         exact: true 
@@ -53,49 +51,51 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
 
   return (
     <Card 
-      className="hover:shadow-lg transition-shadow cursor-pointer border-0 shadow-none hover:bg-accent/5"
+      className="group relative overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer border border-border/50 bg-gradient-to-b from-background/50 to-background hover:from-background/80 hover:to-background"
       onClick={() => navigate(`/journal/${journal.id}`)}
     >
       <CardHeader className="pb-3">
-        <CardTitle className="text-xl md:text-2xl font-serif">{journal.title}</CardTitle>
-        <p className="text-sm text-muted-foreground mt-2">
+        <CardTitle className="text-xl md:text-2xl font-serif tracking-tight">{journal.title}</CardTitle>
+        <p className="text-sm text-muted-foreground/80 font-medium">
           {format(new Date(journal.createdAt), "MMMM d, yyyy")}
         </p>
       </CardHeader>
       <CardContent>
-        <p className="line-clamp-3 text-sm md:text-base text-muted-foreground leading-relaxed mb-4 md:mb-6">
+        <p className="line-clamp-3 text-sm md:text-base text-muted-foreground/90 leading-relaxed mb-6 font-normal">
           {journal.content}
         </p>
 
         {journal.imageUrl && (
-          <div className="mb-4 md:mb-6">
+          <div className="mb-6 overflow-hidden rounded-lg">
             <img
               src={journal.imageUrl}
               alt={journal.title}
-              className="w-full aspect-square object-cover rounded-md max-w-[200px] md:max-w-[300px]"
+              className="w-full aspect-square object-cover transform transition-transform duration-500 group-hover:scale-105"
             />
           </div>
         )}
 
-        <div className="flex items-center gap-4 md:gap-6 text-sm text-muted-foreground" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-6 text-sm text-muted-foreground/70" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={handleLike}
-            className={`flex items-center gap-1.5 transition-colors ${
+            className={`flex items-center gap-2 transition-colors duration-300 ${
               localHasLiked ? 'text-red-500' : 'hover:text-red-500'
             }`}
             disabled={likeMutation.isPending}
           >
             <Heart 
-              className={`h-4 w-4 md:h-5 md:w-5 ${likeMutation.isPending ? 'animate-pulse' : ''}`}
+              className={`h-5 w-5 transition-all duration-300 ${likeMutation.isPending ? 'animate-pulse' : ''} ${
+                localHasLiked ? 'scale-110' : 'scale-100'
+              }`}
               fill={localHasLiked ? "currentColor" : "none"}
               stroke={localHasLiked ? "none" : "currentColor"}
             />
-            <span>{localLikeCount}</span>
+            <span className="font-medium">{localLikeCount}</span>
           </button>
 
-          <div className="flex items-center gap-1.5">
-            <MessageCircle className="h-4 w-4 md:h-5 md:w-5" />
-            <span>{commentsCount}</span>
+          <div className="flex items-center gap-2">
+            <MessageCircle className="h-5 w-5" />
+            <span className="font-medium">{commentsCount}</span>
           </div>
         </div>
       </CardContent>
