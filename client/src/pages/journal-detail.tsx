@@ -97,9 +97,9 @@ export default function JournalDetail() {
                 <Edit2 className="h-4 w-4 mr-2" />
                 Edit Entry
               </Button>
-              <Button 
-                onClick={() => deleteMutation.mutate()} 
-                variant="destructive" 
+              <Button
+                onClick={() => deleteMutation.mutate()}
+                variant="destructive"
                 size="sm"
                 disabled={deleteMutation.isPending}
               >
@@ -131,6 +131,12 @@ export default function JournalDetail() {
           />
         )}
 
+        <div className="prose prose-lg max-w-none mb-8 md:mb-12 text-white/90">
+          {journal.content.split("\n").map((paragraph, index) => (
+            <p key={index} className="text-base md:text-lg">{paragraph}</p>
+          ))}
+        </div>
+
         {journal.videoUrl && (
           <div className="aspect-video mb-6 md:mb-8">
             <iframe
@@ -141,12 +147,6 @@ export default function JournalDetail() {
             />
           </div>
         )}
-
-        <div className="prose prose-lg max-w-none mb-8 md:mb-12 text-white/90">
-          {journal.content.split("\n").map((paragraph, index) => (
-            <p key={index} className="text-base md:text-lg">{paragraph}</p>
-          ))}
-        </div>
 
         <hr className="my-8 md:my-12" />
 
