@@ -74,7 +74,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
         </p>
       </CardHeader>
       <CardContent>
-        <p className="line-clamp-3 text-sm md:text-base text-muted-foreground/90 leading-relaxed mb-6 font-normal">
+        <p className="line-clamp-3 text-base md:text-lg text-muted-foreground/90 leading-relaxed mb-6 font-normal">
           {journal.content}
         </p>
 
