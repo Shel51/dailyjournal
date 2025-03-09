@@ -34,7 +34,7 @@ export default function HomePage() {
         <div className="max-w-2xl mx-auto text-center mb-16">
           <h1 className="text-4xl font-bold mb-4">My Daily Journal</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Welcome to my personal space where I share my thoughts, experiences, and reflections.
+            reflections that refused to dissolve into the hum of routine
           </p>
           {user?.isAdmin && (
             <Button asChild className="bg-primary hover:bg-primary/90 text-2xl font-bold p-4 rounded-lg">
