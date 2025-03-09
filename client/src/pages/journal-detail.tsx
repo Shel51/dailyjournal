@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import { type Journal, type Comment } from "@shared/schema";
 import { CommentSection } from "@/components/comment-section";
-import { Heart, Edit2, Trash2 } from "lucide-react";
+import { Heart, Edit2, Trash2, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -135,6 +135,20 @@ export default function JournalDetail() {
           {journal.content.split("\n").map((paragraph, index) => (
             <p key={index} className="text-base md:text-lg">{paragraph}</p>
           ))}
+
+          {journal.refUrl && (
+            <div className="mt-4 flex items-center gap-2 text-sm">
+              <LinkIcon className="h-4 w-4 text-muted-foreground" />
+              <a 
+                href={journal.refUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              >
+                Reference Link
+              </a>
+            </div>
+          )}
         </div>
 
         {journal.videoUrl && (

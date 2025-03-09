@@ -15,6 +15,7 @@ export const journals = pgTable("journals", {
   content: text("content").notNull(),
   imageUrl: text("image_url"),
   videoUrl: text("video_url"),
+  refUrl: text("ref_url"),
   authorId: integer("author_id").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   likeCount: integer("like_count").notNull().default(0),
@@ -44,6 +45,7 @@ export const insertJournalSchema = createInsertSchema(journals).pick({
   content: true,
   imageUrl: true,
   videoUrl: true,
+  refUrl: true,
 });
 
 export const insertCommentSchema = createInsertSchema(comments).pick({

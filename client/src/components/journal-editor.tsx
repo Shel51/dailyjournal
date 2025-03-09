@@ -51,6 +51,7 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
       content: "",
       imageUrl: "",
       videoUrl: "",
+      refUrl: "",
     },
   });
 
@@ -180,6 +181,20 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
               <FormLabel>Video URL (optional)</FormLabel>
               <FormControl>
                 <Input placeholder="Enter video URL..." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="refUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Reference URL (optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="Add a reference link..." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
