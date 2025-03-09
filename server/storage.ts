@@ -33,6 +33,7 @@ export interface IStorage {
   getCommentsByJournalId(journalId: number): Promise<Comment[]>;
   addLike(journalId: number, ipAddress: string): Promise<void>;
   searchJournals(query: string): Promise<Journal[]>;
+  updateJournal(id: number, journal: InsertJournal & { authorId: number }): Promise<Journal>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -156,6 +157,15 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({ password: newPassword })
       .where(eq(users.id, userId));
+  }
+
+  async updateJournal(id: number, journal: InsertJournal & { authorId: number }): Promise<Journal> {
+    const [updatedJournal] = await db
+      .update(journals)
+      .set(journal)
+      .where(eq(journals.id, id))
+      .returning();
+    return updatedJournal;
   }
 }
 

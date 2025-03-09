@@ -3,7 +3,30 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, hashPassword, comparePasswords } from "./auth"; // Import comparePasswords function as well
 import { insertJournalSchema, insertCommentSchema } from "@shared/schema";
+import multer from "multer";
+import path from "path";
+import fs from "fs/promises";
+import express from 'express';
 
+// Set up multer for handling file uploads
+const multerStorage = multer.diskStorage({
+  destination: "./uploads",
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: multerStorage });
+
+// Ensure uploads directory exists
+(async () => {
+  try {
+    await fs.access("./uploads");
+  } catch {
+    await fs.mkdir("./uploads");
+  }
+})();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
@@ -95,6 +118,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(201).json(journal);
   });
 
+  // Add the edit journal route
+  app.patch("/api/journals/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.sendStatus(403);
+    }
+
+    const parseResult = insertJournalSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      return res.status(400).json(parseResult.error);
+    }
+
+    const journal = await storage.updateJournal(parseInt(req.params.id), {
+      ...parseResult.data,
+      authorId: req.user.id,
+    });
+    res.json(journal);
+  });
+
+
   app.get("/api/journals/:id/comments", async (req, res) => {
     const comments = await storage.getCommentsByJournalId(parseInt(req.params.id));
     res.json(comments);
@@ -147,6 +189,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     res.sendStatus(200);
   });
+
+  // Add this route with the existing routes
+  app.post("/api/upload", upload.single("image"), (req, res) => {
+    if (!req.file) {
+      return res.status(400).send("No file uploaded");
+    }
+
+    // In a production environment, you'd want to upload to a proper storage service
+    // For now, we'll serve the files from our local uploads directory
+    const imageUrl = `/uploads/${req.file.filename}`;
+    res.json({ url: imageUrl });
+  });
+
+  // Add this to serve uploaded files
+  app.use("/uploads", express.static("uploads"));
 
   const httpServer = createServer(app);
   return httpServer;

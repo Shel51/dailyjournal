@@ -1,14 +1,19 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams } from "wouter";
 import { type Journal, type Comment } from "@shared/schema";
 import { CommentSection } from "@/components/comment-section";
-import { Heart } from "lucide-react";
+import { Heart, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { JournalEditor } from "@/components/journal-editor";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function JournalDetail() {
   const { id } = useParams();
+  const { user } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
 
   const { data: journal, isLoading: isLoadingJournal } = useQuery<Journal>({
     queryKey: [`/api/journals/${id}`],
@@ -16,6 +21,16 @@ export default function JournalDetail() {
 
   const { data: comments = [], isLoading: isLoadingComments } = useQuery<Comment[]>({
     queryKey: [`/api/journals/${id}/comments`],
+  });
+
+  const editMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await apiRequest("PATCH", `/api/journals/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}`] });
+      setIsEditing(false);
+    },
   });
 
   const likeMutation = useMutation({
@@ -43,10 +58,30 @@ export default function JournalDetail() {
 
   if (!journal) return <div>Journal not found</div>;
 
+  if (isEditing) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <JournalEditor
+          onSubmit={async (data) => await editMutation.mutateAsync(data)}
+          defaultValues={journal}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <article className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-4">{journal.title}</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-4xl font-bold">{journal.title}</h1>
+          {user?.isAdmin && (
+            <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
+              <Edit2 className="h-4 w-4 mr-2" />
+              Edit Entry
+            </Button>
+          )}
+        </div>
+
         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-8">
           <time>{format(new Date(journal.createdAt), "MMMM d, yyyy")}</time>
           <Button
