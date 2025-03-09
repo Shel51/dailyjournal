@@ -43,7 +43,9 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
-    likeMutation.mutate();
+    if (!likeMutation.isPending) {
+      likeMutation.mutate();
+    }
   };
 
   return (
@@ -83,6 +85,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
             <Heart 
               className={`h-4 w-4 md:h-5 md:w-5 ${likeMutation.isPending ? 'animate-pulse' : ''}`}
               fill={journal.hasLiked ? "currentColor" : "none"}
+              stroke={journal.hasLiked ? "none" : "currentColor"}
             />
             <span>{journal.likeCount}</span>
           </button>

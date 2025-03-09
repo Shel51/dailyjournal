@@ -145,6 +145,7 @@ export default function JournalDetail() {
             <Heart 
               className={`h-4 w-4 ${likeMutation.isPending ? 'animate-pulse' : ''}`}
               fill={journal.hasLiked ? "currentColor" : "none"}
+              stroke={journal.hasLiked ? "none" : "currentColor"}
             />
             <span>{journal.likeCount}</span>
           </Button>
