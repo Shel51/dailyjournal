@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema } from "@shared/schema";
 import { useLocation } from "wouter";
 import { auth, googleProvider } from "@/lib/firebase";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithPopup, getAuth } from "firebase/auth";
 import {
   Card,
   CardContent,
@@ -51,6 +51,10 @@ export default function AuthPage() {
   const handleGoogleSignIn = async () => {
     try {
       console.log('Starting Google sign-in process...');
+      // Configure popup settings
+      const auth = getAuth();
+      auth.languageCode = 'en';
+
       const result = await signInWithPopup(auth, googleProvider);
       console.log('Google sign-in successful, getting ID token...');
       const idToken = await result.user.getIdToken();
@@ -84,10 +88,16 @@ export default function AuthPage() {
       // Handle specific Firebase auth errors
       if (error.code === 'auth/unauthorized-domain') {
         errorMessage = 'This domain is not authorized for sign-in. Please try again in a moment.';
+        console.error('Domain not authorized. Please ensure the following domains are added to Firebase Console:',
+          '\n- journal.shally.repl.co',
+          '\n- *.repl.co');
       } else if (error.code === 'auth/popup-closed-by-user') {
         errorMessage = 'Sign-in was cancelled. Please try again.';
       } else if (error.code === 'auth/cancelled-popup-request') {
         errorMessage = 'Another sign-in attempt is in progress. Please wait.';
+      } else if (error.code === 'auth/configuration-not-found') {
+        errorMessage = 'Firebase configuration error. Please try again later.';
+        console.error('Firebase configuration error. Please check your Firebase config settings.');
       }
 
       toast({
