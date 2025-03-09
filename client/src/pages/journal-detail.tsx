@@ -117,7 +117,7 @@ export default function JournalDetail() {
   return (
     <div className="min-h-screen bg-background/50">
       <div className="container mx-auto py-12">
-        <article className="max-w-3xl mx-auto px-4 md:px-6">
+        <article className="max-w-3xl mx-auto px-6 md:px-8">
           <div className="mb-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif tracking-tight text-foreground">
@@ -185,7 +185,7 @@ export default function JournalDetail() {
 
             <div className="prose prose-lg max-w-none mb-12">
               {journal.content.split("\n").map((paragraph, index) => (
-                <p key={index} className="mb-6 text-lg md:text-xl text-foreground/90 leading-relaxed text-left font-normal">
+                <p key={index} className="mb-6 text-lg md:text-xl text-foreground/90 leading-relaxed text-left px-4 md:px-6 font-normal">
                   {paragraph}
                 </p>
               ))}
