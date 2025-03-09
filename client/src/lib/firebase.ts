@@ -22,5 +22,6 @@ googleProvider.setCustomParameters({
 // Debug logging
 console.log('Firebase config:', {
   ...firebaseConfig,
-  apiKey: '[HIDDEN]' // Don't log the API key
+  apiKey: '[HIDDEN]', // Don't log the API key
+  currentDomain: window.location.hostname
 });

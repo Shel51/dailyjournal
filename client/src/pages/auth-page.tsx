@@ -55,6 +55,10 @@ export default function AuthPage() {
       const auth = getAuth();
       auth.languageCode = 'en';
 
+      // Log current domain information
+      console.log('Current domain:', window.location.hostname);
+      console.log('Current URL:', window.location.href);
+
       const result = await signInWithPopup(auth, googleProvider);
       console.log('Google sign-in successful, getting ID token...');
       const idToken = await result.user.getIdToken();
