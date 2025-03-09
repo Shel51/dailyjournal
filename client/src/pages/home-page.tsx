@@ -32,8 +32,8 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 md:py-16">
         <div className="max-w-2xl mx-auto text-center mb-8 md:mb-16">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">Unspoken Words</h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-6 md:mb-8 leading-relaxed">
+          <h1 className="text-3xl md:text-4xl font-lora mb-4">Unspoken Words</h1>
+          <p className="text-lg md:text-xl font-merriweather text-muted-foreground mb-6 md:mb-8 leading-[1.8]">
             There are moments that slip through our fingers like grains of sand—unnoticed, unspoken. And then there are reflections that linger, refusing to fade into the hum of routine. Here, I pause. I listen and give them a place to rest.
           </p>
           {user?.isAdmin && (

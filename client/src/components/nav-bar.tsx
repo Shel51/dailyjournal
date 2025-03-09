@@ -11,7 +11,7 @@ export function NavBar() {
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 max-w-screen-2xl items-center px-4">
         <Link href="/" className="mr-6 flex items-center space-x-2">
-          <span className="text-lg md:text-xl font-bold">Shally's Journal</span>
+          <span className="text-lg md:text-xl font-lora tracking-tight">Shally's Journal</span>
         </Link>
 
         <div className="flex-1" />
