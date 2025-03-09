@@ -50,6 +50,7 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
       title: "",
       content: "",
       imageUrl: "",
+      imageSubtext: "",
       videoUrl: "",
       refUrl: "",
     },
@@ -148,11 +149,27 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
               />
             </div>
             {previewUrl && (
-              <div className="mt-4">
+              <div className="mt-4 space-y-4">
                 <img
                   src={previewUrl}
                   alt="Preview"
                   className="w-full aspect-square object-cover rounded-md max-w-[300px]"
+                />
+                <FormField
+                  control={form.control}
+                  name="imageSubtext"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Image Caption</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Add a caption for your image..."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
             )}

@@ -165,12 +165,17 @@ export default function JournalDetail() {
         </div>
 
         {journal.imageUrl && (
-          <div className="flex justify-center mb-8">
+          <div className="flex flex-col items-center mb-8">
             <img
               src={journal.imageUrl}
               alt={journal.title}
               className="w-full aspect-square object-cover rounded-lg max-w-[300px] md:max-w-[400px]"
             />
+            {journal.imageSubtext && (
+              <p className="mt-2 text-sm text-muted-foreground text-center italic">
+                {journal.imageSubtext}
+              </p>
+            )}
           </div>
         )}
 
