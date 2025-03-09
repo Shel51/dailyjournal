@@ -52,18 +52,18 @@ export default function AuthPage() {
       <div className="flex items-center justify-center p-8">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Welcome Back</CardTitle>
+            <CardTitle>Welcome to My Journal</CardTitle>
             <CardDescription>
-              Sign in to your account or create a new one
+              Sign in to continue or create a new account. The first user to register will become the admin.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="login">
+            <Tabs defaultValue="register"> {/* Changed default to register */}
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Register</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="login">
                 <Form {...loginForm}>
                   <form

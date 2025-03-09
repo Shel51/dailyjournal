@@ -19,6 +19,21 @@ import {
 
 const PostgresSessionStore = connectPg(session);
 
+export interface IStorage {
+  sessionStore: session.Store;
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(insertUser: InsertUser & { isAdmin?: boolean }): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  createJournal(insertJournal: InsertJournal & { authorId: number }): Promise<Journal>;
+  getJournal(id: number): Promise<Journal | undefined>;
+  getAllJournals(): Promise<Journal[]>;
+  createComment(insertComment: InsertComment & { authorId: number }): Promise<Comment>;
+  getCommentsByJournalId(journalId: number): Promise<Comment[]>;
+  addLike(journalId: number, ipAddress: string): Promise<void>;
+  searchJournals(query: string): Promise<Journal[]>;
+}
+
 export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
 
@@ -112,6 +127,10 @@ export class DatabaseStorage implements IStorage {
       .where(sql`LOWER(title) LIKE ${searchQuery} OR LOWER(content) LIKE ${searchQuery}`)
       .orderBy(sql`${journals.createdAt} DESC`)
       .execute();
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).execute();
   }
 }
 
