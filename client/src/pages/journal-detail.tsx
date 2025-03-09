@@ -120,7 +120,7 @@ export default function JournalDetail() {
         <article className="bg-background rounded-lg shadow-sm border border-border/50">
           <div className="px-4 md:px-6 pt-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-serif tracking-tight text-foreground">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif tracking-tight text-foreground">
                 {journal.title}
               </h1>
               {user?.isAdmin && (
@@ -142,7 +142,7 @@ export default function JournalDetail() {
               )}
             </div>
 
-            <div className="flex items-center gap-4 text-sm text-muted-foreground/80 mb-8 font-medium">
+            <div className="flex items-center gap-4 text-base text-muted-foreground/80 mb-8 font-medium">
               <time>{format(new Date(journal.createdAt), "MMMM d, yyyy")}</time>
               <Button
                 variant="ghost"
@@ -176,7 +176,7 @@ export default function JournalDetail() {
                   className="w-full aspect-square object-cover rounded-lg max-w-[300px] md:max-w-[400px] shadow-md"
                 />
                 {journal.imageSubtext && (
-                  <p className="mt-3 text-xs text-muted-foreground/80 italic text-center max-w-[80%]">
+                  <p className="mt-3 text-sm text-muted-foreground/80 italic text-center max-w-[80%]">
                     {journal.imageSubtext}
                   </p>
                 )}
@@ -185,7 +185,7 @@ export default function JournalDetail() {
 
             <div className="prose prose-lg max-w-none mb-12">
               {journal.content.split("\n").map((paragraph, index) => (
-                <p key={index} className="mb-6 text-base md:text-lg text-foreground/90 leading-relaxed text-left px-2 md:px-4 font-normal">
+                <p key={index} className="mb-6 text-lg md:text-xl text-foreground/90 leading-relaxed text-left px-2 md:px-4 font-normal">
                   {paragraph}
                 </p>
               ))}
