@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useEffect as ReactuseEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import { type Journal, type Comment } from "@shared/schema";
 import { CommentSection } from "@/components/comment-section";
 import { Heart, Edit2, Trash2, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { JournalEditor } from "@/components/journal-editor";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +17,7 @@ export default function JournalDetail() {
   const [_, navigate] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: journal, isLoading: isLoadingJournal } = useQuery<Journal>({
     queryKey: [`/api/journals/${id}`],
@@ -25,6 +26,17 @@ export default function JournalDetail() {
   const { data: comments = [], isLoading: isLoadingComments } = useQuery<Comment[]>({
     queryKey: [`/api/journals/${id}/comments`],
   });
+
+  const [localLikeCount, setLocalLikeCount] = useState(journal?.likeCount ?? 0);
+  const [localHasLiked, setLocalHasLiked] = useState(journal?.hasLiked ?? false);
+
+  // Update local state when journal data changes
+  ReactuseEffect(() => {
+    if (journal) {
+      setLocalLikeCount(journal.likeCount);
+      setLocalHasLiked(journal.hasLiked || false);
+    }
+  }, [journal]);
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -48,26 +60,20 @@ export default function JournalDetail() {
 
   const likeMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", `/api/journals/${id}/like`);
+      const res = await apiRequest("POST", `/api/journals/${id}/like`);
+      return await res.json();
     },
-    onSuccess: () => {
-      // Clear cache for all journal-related queries
-      queryClient.removeQueries({ queryKey: ["/api/journals"] });
-      queryClient.removeQueries({ queryKey: [`/api/journals/${id}`] });
+    onSuccess: (data) => {
+      setLocalLikeCount(data.likeCount);
+      setLocalHasLiked(data.hasLiked);
 
-      // Force immediate refetch
-      queryClient.refetchQueries({ 
-        queryKey: [`/api/journals/${id}`],
-        type: 'active',
-        exact: true,
-      });
-      queryClient.refetchQueries({ 
+      // Invalidate queries
+      queryClient.invalidateQueries({ 
         queryKey: ["/api/journals"],
-        type: 'active',
-        exact: true,
+        exact: true 
       });
     },
-    onError: (error: Error) => {
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to like the journal entry",
@@ -137,17 +143,17 @@ export default function JournalDetail() {
             variant="ghost"
             size="sm"
             className={`flex items-center gap-1.5 transition-colors ${
-              journal.hasLiked ? 'text-red-500' : 'hover:text-red-500'
+              localHasLiked ? 'text-red-500' : 'hover:text-red-500'
             }`}
             onClick={() => likeMutation.mutate()}
             disabled={likeMutation.isPending}
           >
             <Heart 
               className={`h-4 w-4 ${likeMutation.isPending ? 'animate-pulse' : ''}`}
-              fill={journal.hasLiked ? "currentColor" : "none"}
-              stroke={journal.hasLiked ? "none" : "currentColor"}
+              fill={localHasLiked ? "currentColor" : "none"}
+              stroke={localHasLiked ? "none" : "currentColor"}
             />
-            <span>{journal.likeCount}</span>
+            <span>{localLikeCount}</span>
           </Button>
         </div>
 
