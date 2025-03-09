@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { type Journal } from "@shared/schema";
 import { JournalCard } from "@/components/journal-card";
 import { Button } from "@/components/ui/button";
-import { PencilLine, LogIn } from "lucide-react";
+import { PencilLine } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -36,18 +36,11 @@ export default function HomePage() {
           <p className="text-xl text-muted-foreground mb-8">
             Welcome to my personal space where I share my thoughts, experiences, and reflections.
           </p>
-          {user?.isAdmin ? (
+          {user?.isAdmin && (
             <Button asChild className="bg-primary hover:bg-primary/90 text-2xl font-bold p-4 rounded-lg">
               <Link href="/today">
                 <PencilLine className="mr-2 h-6 w-6" />
                 Today's thought
-              </Link>
-            </Button>
-          ) : !user && (
-            <Button asChild variant="outline" className="text-lg p-3">
-              <Link href="/auth">
-                <LogIn className="mr-2 h-5 w-5" />
-                Sign in to write
               </Link>
             </Button>
           )}
@@ -59,7 +52,6 @@ export default function HomePage() {
               key={journal.id}
               journal={journal}
               commentsCount={getCommentCount(journal.id)}
-              onLike={() => {}}
             />
           ))}
         </div>
