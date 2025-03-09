@@ -99,7 +99,7 @@ export default function JournalDetail() {
           <img
             src={journal.imageUrl}
             alt={journal.title}
-            className="w-full aspect-video object-cover rounded-lg mb-8"
+            className="w-full aspect-square object-cover rounded-lg mb-8 max-w-[400px]"
           />
         )}
 

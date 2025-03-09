@@ -30,11 +30,11 @@ export function JournalCard({ journal, commentsCount, onLike }: JournalCardProps
         </p>
 
         {journal.imageUrl && (
-          <div className="max-w-[300px] mb-6">
+          <div className="mb-6">
             <img
               src={journal.imageUrl}
               alt={journal.title}
-              className="w-full aspect-video object-cover rounded-md"
+              className="w-full aspect-square object-cover rounded-md max-w-[300px]"
             />
           </div>
         )}

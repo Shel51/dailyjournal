@@ -151,7 +151,7 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
                 <img
                   src={previewUrl}
                   alt="Preview"
-                  className="max-w-[300px] rounded-md"
+                  className="w-full aspect-square object-cover rounded-md max-w-[300px]"
                 />
               </div>
             )}
