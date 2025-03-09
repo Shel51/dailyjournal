@@ -19,8 +19,8 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
       await apiRequest("POST", `/api/journals/${journal.id}/like`);
     },
     onSuccess: () => {
+      // Invalidate both the journals list and the specific journal
       queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/journals/search"] });
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${journal.id}`] });
     },
   });
@@ -55,8 +55,9 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
           <button
             onClick={() => likeMutation.mutate()}
             className="flex items-center gap-1.5 hover:text-primary transition-colors"
+            disabled={likeMutation.isPending}
           >
-            <Heart className="h-4 w-4 md:h-5 md:w-5" />
+            <Heart className={`h-4 w-4 md:h-5 md:w-5 ${likeMutation.isPending ? 'animate-pulse' : ''}`} />
             <span>{journal.likeCount}</span>
           </button>
 

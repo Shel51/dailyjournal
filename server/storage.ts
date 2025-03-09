@@ -151,21 +151,19 @@ export class DatabaseStorage implements IStorage {
     if (!ipAddress) return;
 
     // Check if the user has already liked this journal
-    const existingLikes = await db
+    const [existingLike] = await db
       .select()
       .from(likes)
       .where(eq(likes.journalId, journalId))
       .where(eq(likes.ipAddress, ipAddress))
       .execute();
 
-    if (existingLikes.length > 0) return;
+    if (existingLike) return;
 
-    // Add the like in a transaction
+    // Add the like and update count in a transaction
     await db.transaction(async (tx) => {
-      // Insert the new like
       await tx.insert(likes).values({ journalId, ipAddress });
 
-      // Update the like count
       await tx
         .update(journals)
         .set({
