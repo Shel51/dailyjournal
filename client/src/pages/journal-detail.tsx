@@ -138,13 +138,19 @@ export default function JournalDetail() {
         </div>
 
         {journal.videoUrl && (
-          <div className="aspect-video mb-6 md:mb-8">
-            <iframe
-              src={journal.videoUrl}
-              className="w-full h-full rounded-lg"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+          <div className="w-full max-w-3xl mx-auto mb-8">
+            <div className="relative w-full aspect-video">
+              <iframe
+                src={journal.videoUrl.includes('youtube.com') ? 
+                  journal.videoUrl.replace('watch?v=', 'embed/') : 
+                  journal.videoUrl}
+                title="Video content"
+                className="absolute top-0 left-0 w-full h-full rounded-lg"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
           </div>
         )}
 
