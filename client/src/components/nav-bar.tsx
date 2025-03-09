@@ -19,9 +19,9 @@ export function NavBar() {
 
         <div className="flex items-center gap-4">
           {user.isAdmin && (
-            <div className="flex items-center gap-2 text-sm">
-              <UserCircle className="h-5 w-5" />
-              <span className="font-medium">Admin</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full text-sm">
+              <UserCircle className="h-5 w-5 text-primary" />
+              <span className="font-medium text-primary">Admin Account</span>
             </div>
           )}
           <Button 

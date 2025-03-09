@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 export default function AuthPage() {
   const [_, setLocation] = useLocation();
@@ -54,11 +56,18 @@ export default function AuthPage() {
           <CardHeader>
             <CardTitle>Welcome to My Journal</CardTitle>
             <CardDescription>
-              Sign in to continue or create a new account. The first user to register will become the admin.
+              Sign in to continue or create a new account.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="register"> {/* Changed default to register */}
+            <Alert className="mb-6 bg-primary/10 border-primary">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                The first user to register will become the admin with full access to create and manage journal entries.
+              </AlertDescription>
+            </Alert>
+
+            <Tabs defaultValue="register">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Register</TabsTrigger>
