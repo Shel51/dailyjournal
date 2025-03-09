@@ -34,7 +34,7 @@ export default function HomePage() {
         <div className="max-w-2xl mx-auto text-center mb-16">
           <h1 className="text-4xl font-bold mb-4">My Daily Journal</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            reflections that refused to dissolve into the hum of routine
+            There are moments that slip through our fingers like grains of sand—unnoticed, unspoken. And then there are reflections that linger, refusing to fade into the hum of routine. Here, I pause. I listen and give them a place to rest.
           </p>
           {user?.isAdmin && (
             <Button asChild className="bg-primary hover:bg-primary/90 text-2xl font-bold p-4 rounded-lg">
