@@ -69,11 +69,13 @@ export function CommentSection({
     },
   });
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: { content: string }) => {
     try {
       setIsSubmitting(true);
       await onSubmitComment(data.content);
       form.reset();
+    } catch (error) {
+      console.error('Error submitting comment:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -84,7 +86,7 @@ export function CommentSection({
     setEditingCommentId(comment.id);
   };
 
-  const handleEditSubmit = async (data: any) => {
+  const handleEditSubmit = async (data: { content: string }) => {
     if (!editingCommentId) return;
     await editMutation.mutateAsync({ id: editingCommentId, content: data.content });
   };
