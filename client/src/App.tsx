@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home-page";
 import JournalDetail from "@/pages/journal-detail";
 import NewEntry from "@/pages/new-entry";
+import AuthPage from "@/pages/auth-page";
 import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/journal/:id" component={JournalDetail} />
       <ProtectedRoute path="/new" component={NewEntry} />
       <ProtectedRoute path="/today" component={NewEntry} />
+      <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
   );
