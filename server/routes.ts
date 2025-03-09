@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, hashPassword, comparePasswords } from "./auth"; // Import comparePasswords function as well
+import { setupAuth, hashPassword, comparePasswords } from "./auth";
 import { insertJournalSchema, insertCommentSchema } from "@shared/schema";
 import multer from "multer";
 import path from "path";
@@ -118,7 +118,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(201).json(journal);
   });
 
-  // Add the edit journal route
   app.patch("/api/journals/:id", async (req, res) => {
     if (!req.isAuthenticated() || !req.user?.isAdmin) {
       return res.sendStatus(403);
@@ -135,7 +134,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
     res.json(journal);
   });
-
 
   app.get("/api/journals/:id/comments", async (req, res) => {
     const comments = await storage.getCommentsByJournalId(parseInt(req.params.id));
@@ -165,7 +163,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/journals/:id/like", async (req, res) => {
     const journalId = parseInt(req.params.id);
-    const ipAddress = req.ip;
+    const ipAddress = req.ip || req.socket.remoteAddress || 'unknown';
     await storage.addLike(journalId, ipAddress);
     res.sendStatus(200);
   });
@@ -190,19 +188,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendStatus(200);
   });
 
-  // Add this route with the existing routes
-  app.post("/api/upload", upload.single("image"), (req, res) => {
-    if (!req.file) {
-      return res.status(400).send("No file uploaded");
-    }
+  // File upload route with improved error handling
+  app.post("/api/upload", upload.single("image"), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
 
-    // In a production environment, you'd want to upload to a proper storage service
-    // For now, we'll serve the files from our local uploads directory
-    const imageUrl = `/uploads/${req.file.filename}`;
-    res.json({ url: imageUrl });
+      // Ensure the uploads directory exists
+      try {
+        await fs.access("./uploads");
+      } catch {
+        await fs.mkdir("./uploads");
+      }
+
+      const imageUrl = `/uploads/${req.file.filename}`;
+      res.json({ url: imageUrl });
+    } catch (error) {
+      console.error("Error handling file upload:", error);
+      res.status(500).json({ error: "Failed to process file upload" });
+    }
   });
 
-  // Add this to serve uploaded files
+  // Serve uploaded files
   app.use("/uploads", express.static("uploads"));
 
   const httpServer = createServer(app);
