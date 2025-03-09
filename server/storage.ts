@@ -38,6 +38,7 @@ export interface IStorage {
   getComment(id: number): Promise<Comment | undefined>;
   deleteComment(id: number): Promise<void>;
   updateComment(id: number, data: { content: string }): Promise<Comment>;
+  deleteJournal(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -223,6 +224,15 @@ export class DatabaseStorage implements IStorage {
       .where(eq(comments.id, id))
       .returning();
     return comment;
+  }
+
+  async deleteJournal(id: number): Promise<void> {
+    // First delete all comments associated with this journal
+    await db.delete(comments).where(eq(comments.journalId, id));
+    // Then delete all likes associated with this journal
+    await db.delete(likes).where(eq(likes.journalId, id));
+    // Finally delete the journal itself
+    await db.delete(journals).where(eq(journals.id, id));
   }
 }
 

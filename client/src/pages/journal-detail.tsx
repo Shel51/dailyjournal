@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { type Journal, type Comment } from "@shared/schema";
 import { CommentSection } from "@/components/comment-section";
-import { Heart, Edit2 } from "lucide-react";
+import { Heart, Edit2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 export default function JournalDetail() {
   const { id } = useParams();
   const { user } = useAuth();
+  const [_, navigate] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
 
   const { data: journal, isLoading: isLoadingJournal } = useQuery<Journal>({
@@ -21,6 +22,16 @@ export default function JournalDetail() {
 
   const { data: comments = [], isLoading: isLoadingComments } = useQuery<Comment[]>({
     queryKey: [`/api/journals/${id}/comments`],
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("DELETE", `/api/journals/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
+      navigate("/");
+    },
   });
 
   const editMutation = useMutation({
@@ -38,7 +49,6 @@ export default function JournalDetail() {
       await apiRequest("POST", `/api/journals/${id}/like`);
     },
     onSuccess: () => {
-      // Invalidate both list queries and the current journal query
       queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/journals/search"] });
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}`] });
@@ -50,7 +60,6 @@ export default function JournalDetail() {
       await apiRequest("POST", `/api/journals/${id}/comments`, { content });
     },
     onSuccess: () => {
-      // Invalidate both the specific journal's comments and the global comments query
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}/comments`] });
       queryClient.invalidateQueries({ queryKey: ["/api/comments"] });
     },
@@ -83,10 +92,21 @@ export default function JournalDetail() {
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-4xl font-bold">{journal.title}</h1>
           {user?.isAdmin && (
-            <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
-              <Edit2 className="h-4 w-4 mr-2" />
-              Edit Entry
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
+                <Edit2 className="h-4 w-4 mr-2" />
+                Edit Entry
+              </Button>
+              <Button 
+                onClick={() => deleteMutation.mutate()} 
+                variant="destructive" 
+                size="sm"
+                disabled={deleteMutation.isPending}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {deleteMutation.isPending ? "Deleting..." : "Delete Entry"}
+              </Button>
+            </div>
           )}
         </div>
 

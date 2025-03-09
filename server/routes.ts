@@ -135,6 +135,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(journal);
   });
 
+  app.delete("/api/journals/:id", async (req, res) => {
+    if (!req.isAuthenticated() || !req.user?.isAdmin) {
+      return res.sendStatus(403);
+    }
+
+    const journal = await storage.getJournal(parseInt(req.params.id));
+    if (!journal) {
+      return res.sendStatus(404);
+    }
+
+    await storage.deleteJournal(parseInt(req.params.id));
+    res.sendStatus(200);
+  });
+
+
   app.get("/api/journals/:id/comments", async (req, res) => {
     const comments = await storage.getCommentsByJournalId(parseInt(req.params.id));
     res.json(comments);
