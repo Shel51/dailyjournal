@@ -121,7 +121,6 @@ export default function AuthPage() {
       errorMessage = 'Another sign-in attempt is in progress. Please wait.';
     }
 
-
     toast({
       title: "Error",
       description: errorMessage,
