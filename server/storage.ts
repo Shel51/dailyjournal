@@ -1,6 +1,6 @@
 import { IStorage } from "./storage";
 import session from "express-session";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { eq, sql } from "drizzle-orm";
 import connectPg from "connect-pg-simple";
 import {
@@ -42,16 +42,21 @@ export class DatabaseStorage implements IStorage {
       throw new Error("DATABASE_URL not set");
     }
     this.sessionStore = new PostgresSessionStore({
-      conObject: {
-        connectionString: process.env.DATABASE_URL,
-      },
+      pool: pool,
+      tableName: 'session',
       createTableIfMissing: true,
+      pruneSessionInterval: 60 * 15 // Prune expired sessions every 15 minutes
     });
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    try {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user;
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      return undefined;
+    }
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
@@ -62,6 +67,10 @@ export class DatabaseStorage implements IStorage {
   async createUser(insertUser: InsertUser & { isAdmin?: boolean }): Promise<User> {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).execute();
   }
 
   async createJournal(insertJournal: InsertJournal & { authorId: number }): Promise<Journal> {
@@ -127,10 +136,6 @@ export class DatabaseStorage implements IStorage {
       .where(sql`LOWER(title) LIKE ${searchQuery} OR LOWER(content) LIKE ${searchQuery}`)
       .orderBy(sql`${journals.createdAt} DESC`)
       .execute();
-  }
-
-  async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users).execute();
   }
 }
 
