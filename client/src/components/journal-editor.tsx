@@ -150,11 +150,18 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
             </div>
             {previewUrl && (
               <div className="mt-4 space-y-4">
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="w-full aspect-square object-cover rounded-md max-w-[300px]"
-                />
+                <div className="relative">
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="w-full aspect-square object-cover rounded-lg max-w-[300px]"
+                  />
+                  {form.getValues("imageSubtext") && (
+                    <p className="mt-2 text-xs text-muted-foreground/80 italic text-center">
+                      {form.getValues("imageSubtext")}
+                    </p>
+                  )}
+                </div>
                 <FormField
                   control={form.control}
                   name="imageSubtext"

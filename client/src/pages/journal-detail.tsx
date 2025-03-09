@@ -172,7 +172,7 @@ export default function JournalDetail() {
               className="w-full aspect-square object-cover rounded-lg max-w-[300px] md:max-w-[400px]"
             />
             {journal.imageSubtext && (
-              <p className="mt-2 text-sm text-muted-foreground text-center italic">
+              <p className="mt-2 text-xs text-muted-foreground/80 italic text-center">
                 {journal.imageSubtext}
               </p>
             )}
