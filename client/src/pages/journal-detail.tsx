@@ -50,7 +50,9 @@ export default function JournalDetail() {
       await apiRequest("POST", `/api/journals/${id}/comments`, { content });
     },
     onSuccess: () => {
+      // Invalidate both the specific journal's comments and the global comments query
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}/comments`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/comments"] });
     },
   });
 
