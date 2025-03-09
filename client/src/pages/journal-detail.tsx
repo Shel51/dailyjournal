@@ -117,7 +117,7 @@ export default function JournalDetail() {
   return (
     <div className="min-h-screen bg-background/50">
       <div className="container mx-auto py-12">
-        <article className="max-w-3xl mx-auto px-6 md:px-8">
+        <article className="max-w-3xl mx-auto px-5 md:px-7">
           <div className="mb-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif tracking-tight text-foreground">
@@ -148,13 +148,13 @@ export default function JournalDetail() {
                 variant="ghost"
                 size="sm"
                 className={`flex items-center gap-1.5 transition-colors ${
-                  localHasLiked ? 'text-red-500' : 'hover:text-red-500'
+                  localHasLiked ? "text-red-500" : "hover:text-red-500"
                 }`}
                 onClick={() => likeMutation.mutate()}
                 disabled={likeMutation.isPending}
               >
                 <Heart
-                  className={`h-4 w-4 ${likeMutation.isPending ? 'animate-pulse' : ''}`}
+                  className={`h-4 w-4 ${likeMutation.isPending ? "animate-pulse" : ""}`}
                   fill={localHasLiked ? "currentColor" : "none"}
                   stroke={localHasLiked ? "none" : "currentColor"}
                 />
@@ -185,7 +185,7 @@ export default function JournalDetail() {
 
             <div className="prose prose-lg max-w-none mb-12">
               {journal.content.split("\n").map((paragraph, index) => (
-                <p key={index} className="mb-6 text-lg md:text-xl text-foreground/90 leading-relaxed text-left px-4 md:px-6 font-normal">
+                <p key={index} className="mb-6 text-lg md:text-xl text-foreground/90 leading-relaxed text-left px-3 md:px-5 font-normal">
                   {paragraph}
                 </p>
               ))}
@@ -195,9 +195,7 @@ export default function JournalDetail() {
               <div className="w-full max-w-2xl mx-auto mb-10">
                 <div className="relative w-full aspect-video rounded-lg overflow-hidden shadow-md">
                   <iframe
-                    src={journal.videoUrl.includes('youtube.com') ?
-                      journal.videoUrl.replace('watch?v=', 'embed/') :
-                      journal.videoUrl}
+                    src={journal.videoUrl.includes("youtube.com") ? journal.videoUrl.replace("watch?v=", "embed/") : journal.videoUrl}
                     title="Video content"
                     className="absolute top-0 left-0 w-full h-full"
                     frameBorder="0"
