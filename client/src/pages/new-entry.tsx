@@ -24,13 +24,7 @@ export default function NewEntry() {
   });
 
   if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg text-muted-foreground">
-          Please log in to create journal entries.
-        </p>
-      </div>
-    );
+    return null;
   }
 
   return (
