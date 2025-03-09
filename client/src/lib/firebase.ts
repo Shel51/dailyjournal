@@ -1,38 +1,14 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  // Use current hostname for development
-  authDomain: window.location.hostname,
+  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
   storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
-// Add these configuration settings to the provider
-googleProvider.setCustomParameters({
-  prompt: 'select_account'
-});
-
-// Debug logging
-console.log('Firebase config:', {
-  ...firebaseConfig,
-  apiKey: '[HIDDEN]', // Don't log the API key
-  currentDomain: window.location.hostname,
-  authDomain: firebaseConfig.authDomain,
-  projectId: firebaseConfig.projectId
-});
-
-// Add detailed error checking for domain configuration
-if (!firebaseConfig.authDomain) {
-  console.error('Firebase authDomain is not configured properly');
-}
-if (!firebaseConfig.projectId) {
-  console.error('Firebase projectId is not configured properly');
-}
