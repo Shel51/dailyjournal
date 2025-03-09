@@ -6,27 +6,11 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
-import { getAuth } from "firebase-admin/auth";
-import { initializeApp, cert } from "firebase-admin/app";
 
 declare global {
   namespace Express {
     interface User extends SelectUser {}
   }
-}
-
-// Initialize Firebase Admin
-try {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-  console.log('Firebase Admin initialized successfully');
-} catch (error) {
-  console.error('Error initializing Firebase Admin:', error);
 }
 
 const scryptAsync = promisify(scrypt);
@@ -72,53 +56,6 @@ export function setupAuth(app: Express) {
   passport.deserializeUser(async (id: number, done) => {
     const user = await storage.getUser(id);
     done(null, user);
-  });
-
-  // Handle Google authentication
-  app.post("/api/auth/google", async (req, res) => {
-    try {
-      console.log('Received Google auth request');
-      const { token } = req.body;
-
-      if (!token) {
-        console.error('No token provided');
-        return res.status(400).json({ error: 'No token provided' });
-      }
-
-      console.log('Verifying token with Firebase Admin');
-      const decodedToken = await getAuth().verifyIdToken(token);
-
-      if (!decodedToken.email) {
-        console.error('No email in decoded token');
-        return res.status(400).json({ error: 'Email is required' });
-      }
-
-      console.log('Looking up user by email:', decodedToken.email);
-      let user = await storage.getUserByEmail(decodedToken.email);
-
-      if (!user) {
-        console.log('Creating new user for email:', decodedToken.email);
-        const username = decodedToken.email.split('@')[0];
-        user = await storage.createUser({
-          username,
-          email: decodedToken.email,
-          password: await hashPassword(randomBytes(32).toString('hex')),
-          isAdmin: false,
-        });
-      }
-
-      req.login(user, (err) => {
-        if (err) {
-          console.error('Login error:', err);
-          return res.status(500).json({ error: 'Failed to login' });
-        }
-        console.log('User successfully logged in:', user.username);
-        res.json(user);
-      });
-    } catch (error) {
-      console.error('Google auth error:', error);
-      res.status(401).json({ error: error.message || 'Authentication failed' });
-    }
   });
 
   app.post("/api/register", async (req, res, next) => {
