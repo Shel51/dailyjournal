@@ -167,9 +167,9 @@ export default function JournalDetail() {
           </div>
         )}
 
-        <div className="prose prose-lg max-w-none mb-12">
+        <div className="prose prose-lg max-w-none mb-12 px-4 md:px-8">
           {journal.content.split("\n").map((paragraph, index) => (
-            <p key={index} className="text-base md:text-lg text-foreground/90 leading-relaxed text-justify">
+            <p key={index} className="mb-4 text-base md:text-lg text-foreground/90 leading-relaxed text-justify hyphens-auto">
               {paragraph}
             </p>
           ))}
