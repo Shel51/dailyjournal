@@ -18,6 +18,31 @@ import {
 
 const PostgresSessionStore = connectPg(session);
 
+// Add email field to getUserByEmail interface
+export interface IStorage {
+  sessionStore: session.Store;
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(insertUser: InsertUser & { isAdmin?: boolean }): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  createJournal(insertJournal: InsertJournal & { authorId: number }): Promise<Journal>;
+  getJournal(id: number): Promise<Journal | undefined>;
+  getAllJournals(): Promise<Journal[]>;
+  createComment(insertComment: InsertComment & { authorId: number }): Promise<Comment>;
+  getCommentsByJournalId(journalId: number): Promise<Comment[]>;
+  getAllComments(): Promise<Comment[]>;
+  addLike(journalId: number, ipAddress: string): Promise<{ success: boolean; likeCount: number }>;
+  hasLiked(journalId: number, ipAddress: string): Promise<boolean>;
+  updateUserPassword(userId: number, newPassword: string): Promise<void>;
+  updateJournal(id: number, journal: InsertJournal & { authorId: number }): Promise<Journal>;
+  getComment(id: number): Promise<Comment | undefined>;
+  deleteComment(id: number): Promise<void>;
+  updateComment(id: number, data: { content: string }): Promise<Comment>;
+  deleteJournal(id: number): Promise<void>;
+  searchJournals(query: string): Promise<Journal[]>;
+}
+
 export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
 
@@ -137,7 +162,7 @@ export class DatabaseStorage implements IStorage {
       .execute();
   }
 
-  async addLike(journalId: number, ipAddress: string): Promise<{ success: boolean, likeCount: number }> {
+  async addLike(journalId: number, ipAddress: string): Promise<{ success: boolean; likeCount: number }> {
     if (!ipAddress) {
       throw new Error('IP address is required');
     }
@@ -260,6 +285,19 @@ export class DatabaseStorage implements IStorage {
       .where(sql`LOWER(title) LIKE ${searchQuery} OR LOWER(content) LIKE ${searchQuery}`)
       .orderBy(sql`${journals.createdAt} DESC`)
       .execute();
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    try {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email));
+      return user;
+    } catch (error) {
+      console.error('Error fetching user by email:', error);
+      return undefined;
+    }
   }
 }
 
