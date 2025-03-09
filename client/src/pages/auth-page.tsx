@@ -50,10 +50,12 @@ export default function AuthPage() {
 
   const handleGoogleSignIn = async () => {
     try {
+      console.log('Starting Google sign-in process...');
       const result = await signInWithPopup(auth, googleProvider);
+      console.log('Google sign-in successful, getting ID token...');
       const idToken = await result.user.getIdToken();
 
-      // Send the token to our backend
+      console.log('Sending token to backend...');
       const response = await fetch('/api/auth/google', {
         method: 'POST',
         headers: {
@@ -67,6 +69,8 @@ export default function AuthPage() {
       }
 
       const userData = await response.json();
+      console.log('Authentication successful:', userData);
+
       toast({
         title: "Success",
         description: "Successfully signed in with Google",
@@ -74,9 +78,10 @@ export default function AuthPage() {
 
       setLocation("/");
     } catch (error: any) {
+      console.error('Google sign-in error:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || 'Failed to sign in with Google',
         variant: "destructive",
       });
     }
