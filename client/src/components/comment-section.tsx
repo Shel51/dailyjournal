@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format } from "date-fns";
+import { UserCircle } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -85,12 +86,12 @@ export function CommentSection({
           <div key={comment.id} className="flex gap-4">
             <Avatar>
               <AvatarFallback>
-                {comment.authorId.toString().slice(0, 2)}
+                <UserCircle className="h-5 w-5" />
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">User {comment.authorId}</span>
+                <span className="text-sm font-medium">{comment.username || 'Anonymous User'}</span>
                 <span className="text-xs text-muted-foreground">
                   {format(new Date(comment.createdAt), "MMM d, yyyy")}
                 </span>

@@ -113,8 +113,16 @@ export class DatabaseStorage implements IStorage {
 
   async getCommentsByJournalId(journalId: number): Promise<Comment[]> {
     return await db
-      .select()
+      .select({
+        id: comments.id,
+        content: comments.content,
+        journalId: comments.journalId,
+        authorId: comments.authorId,
+        createdAt: comments.createdAt,
+        username: users.username
+      })
       .from(comments)
+      .leftJoin(users, eq(comments.authorId, users.id))
       .where(eq(comments.journalId, journalId))
       .orderBy(sql`${comments.createdAt} DESC`)
       .execute();
@@ -122,8 +130,16 @@ export class DatabaseStorage implements IStorage {
 
   async getAllComments(): Promise<Comment[]> {
     return await db
-      .select()
+      .select({
+        id: comments.id,
+        content: comments.content,
+        journalId: comments.journalId,
+        authorId: comments.authorId,
+        createdAt: comments.createdAt,
+        username: users.username
+      })
       .from(comments)
+      .leftJoin(users, eq(comments.authorId, users.id))
       .orderBy(sql`${comments.createdAt} DESC`)
       .execute();
   }

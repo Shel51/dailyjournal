@@ -57,5 +57,7 @@ export type InsertComment = z.infer<typeof insertCommentSchema>;
 
 export type User = typeof users.$inferSelect;
 export type Journal = typeof journals.$inferSelect;
-export type Comment = typeof comments.$inferSelect;
+export type Comment = typeof comments.$inferSelect & {
+  username?: string;
+};
 export type Like = typeof likes.$inferSelect;
