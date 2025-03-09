@@ -115,121 +115,129 @@ export default function JournalDetail() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <article className="max-w-3xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <h1 className="text-2xl md:text-4xl font-bold text-foreground">{journal.title}</h1>
-          {user?.isAdmin && (
-            <div className="flex items-center gap-2">
-              <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
-                <Edit2 className="h-4 w-4 mr-2" />
-                Edit Entry
-              </Button>
-              <Button
-                onClick={() => deleteMutation.mutate()}
-                variant="destructive"
-                size="sm"
-                disabled={deleteMutation.isPending}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                {deleteMutation.isPending ? "Deleting..." : "Delete Entry"}
-              </Button>
+    <div className="min-h-screen bg-background/50">
+      <div className="container mx-auto px-4 py-12 max-w-3xl">
+        <article className="bg-background rounded-lg shadow-sm border border-border/50">
+          <div className="px-6 md:px-8 pt-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-serif tracking-tight text-foreground">
+                {journal.title}
+              </h1>
+              {user?.isAdmin && (
+                <div className="flex items-center gap-2">
+                  <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Edit Entry
+                  </Button>
+                  <Button
+                    onClick={() => deleteMutation.mutate()}
+                    variant="destructive"
+                    size="sm"
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    {deleteMutation.isPending ? "Deleting..." : "Delete Entry"}
+                  </Button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-8">
-          <time>{format(new Date(journal.createdAt), "MMMM d, yyyy")}</time>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`flex items-center gap-1.5 transition-colors ${
-              localHasLiked ? 'text-red-500' : 'hover:text-red-500'
-            }`}
-            onClick={() => likeMutation.mutate()}
-            disabled={likeMutation.isPending}
-          >
-            <Heart
-              className={`h-4 w-4 ${likeMutation.isPending ? 'animate-pulse' : ''}`}
-              fill={localHasLiked ? "currentColor" : "none"}
-              stroke={localHasLiked ? "none" : "currentColor"}
-            />
-            <span>{localLikeCount}</span>
-          </Button>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground/80 mb-8 font-medium">
+              <time>{format(new Date(journal.createdAt), "MMMM d, yyyy")}</time>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`flex items-center gap-1.5 transition-colors ${
+                  localHasLiked ? 'text-red-500' : 'hover:text-red-500'
+                }`}
+                onClick={() => likeMutation.mutate()}
+                disabled={likeMutation.isPending}
+              >
+                <Heart
+                  className={`h-4 w-4 ${likeMutation.isPending ? 'animate-pulse' : ''}`}
+                  fill={localHasLiked ? "currentColor" : "none"}
+                  stroke={localHasLiked ? "none" : "currentColor"}
+                />
+                <span>{localLikeCount}</span>
+              </Button>
 
-          <ShareButton
-            title={journal.title}
-            url={window.location.href}
-            className="ml-auto"
-          />
-        </div>
-
-        {journal.imageUrl && (
-          <div className="flex flex-col items-center mb-8">
-            <img
-              src={journal.imageUrl}
-              alt={journal.title}
-              className="w-full aspect-square object-cover rounded-lg max-w-[300px] md:max-w-[400px]"
-            />
-            {journal.imageSubtext && (
-              <p className="mt-2 text-xs text-muted-foreground/80 italic text-center">
-                {journal.imageSubtext}
-              </p>
-            )}
-          </div>
-        )}
-
-        <div className="prose prose-lg max-w-none mb-12 px-4 md:px-8">
-          {journal.content.split("\n").map((paragraph, index) => (
-            <p key={index} className="mb-4 text-base md:text-lg text-foreground/90 leading-relaxed text-left px-4 md:px-12">
-              {paragraph}
-            </p>
-          ))}
-        </div>
-
-        {journal.videoUrl && (
-          <div className="w-full max-w-2xl mx-auto mb-8">
-            <div className="relative w-full aspect-video">
-              <iframe
-                src={journal.videoUrl.includes('youtube.com') ?
-                  journal.videoUrl.replace('watch?v=', 'embed/') :
-                  journal.videoUrl}
-                title="Video content"
-                className="absolute top-0 left-0 w-full h-full rounded-lg"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
+              <ShareButton
+                title={journal.title}
+                url={window.location.href}
+                className="ml-auto"
               />
             </div>
+
+            {journal.imageUrl && (
+              <div className="flex flex-col items-center mb-10">
+                <img
+                  src={journal.imageUrl}
+                  alt={journal.title}
+                  className="w-full aspect-square object-cover rounded-lg max-w-[300px] md:max-w-[400px] shadow-md"
+                />
+                {journal.imageSubtext && (
+                  <p className="mt-3 text-xs text-muted-foreground/80 italic text-center max-w-[80%]">
+                    {journal.imageSubtext}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="prose prose-lg max-w-none mb-12">
+              {journal.content.split("\n").map((paragraph, index) => (
+                <p key={index} className="mb-6 text-base md:text-lg text-foreground/90 leading-relaxed text-left px-6 md:px-8 font-normal">
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+
+            {journal.videoUrl && (
+              <div className="w-full max-w-2xl mx-auto mb-10">
+                <div className="relative w-full aspect-video rounded-lg overflow-hidden shadow-md">
+                  <iframe
+                    src={journal.videoUrl.includes('youtube.com') ?
+                      journal.videoUrl.replace('watch?v=', 'embed/') :
+                      journal.videoUrl}
+                    title="Video content"
+                    className="absolute top-0 left-0 w-full h-full"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              </div>
+            )}
+
+            {journal.refUrl && (
+              <div className="flex items-center justify-center gap-2 text-sm mb-8">
+                <LinkIcon className="h-4 w-4 text-muted-foreground" />
+                <a
+                  href={journal.refUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline transition-colors"
+                >
+                  Reference Link
+                </a>
+              </div>
+            )}
           </div>
-        )}
 
-        {journal.refUrl && (
-          <div className="mt-4 flex items-center justify-center gap-2 text-sm mb-8">
-            <LinkIcon className="h-4 w-4 text-muted-foreground" />
-            <a
-              href={journal.refUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              Reference Link
-            </a>
+          <hr className="my-8 border-border/50" />
+
+          <div className="px-6 md:px-8 pb-8">
+            <CommentSection
+              comments={comments}
+              journalId={journal.id}
+              onSubmitComment={async (content) => {
+                const res = await apiRequest("POST", `/api/journals/${id}/comments`, { content });
+                queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}/comments`] });
+                return res;
+              }}
+            />
           </div>
-        )}
-
-        <hr className="my-12 border-border" />
-
-        <CommentSection
-          comments={comments}
-          journalId={journal.id}
-          onSubmitComment={async (content) => {
-            const res = await apiRequest("POST", `/api/journals/${id}/comments`, { content });
-            queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}/comments`] });
-            return res;
-          }}
-        />
-      </article>
+        </article>
+      </div>
     </div>
   );
 }
