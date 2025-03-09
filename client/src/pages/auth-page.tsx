@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertUserSchema } from "@shared/schema";
 import { useLocation } from "wouter";
 import { auth, googleProvider } from "@/lib/firebase";
-import { signInWithPopup } from "firebase/auth";
+import { signInWithRedirect } from "firebase/auth";
 import {
   Card,
   CardContent,
@@ -26,11 +26,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SiGoogle } from "react-icons/si";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { useGoogleAuth } from '@/hooks/use-google-auth';
 
 export default function AuthPage() {
   const [_, setLocation] = useLocation();
   const { user, loginMutation, registerMutation } = useAuth();
   const { toast } = useToast();
+  useGoogleAuth(); // Added useGoogleAuth hook
 
   const loginForm = useForm({
     resolver: zodResolver(insertUserSchema),
@@ -50,29 +52,9 @@ export default function AuthPage() {
 
   const handleGoogleSignIn = async () => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const idToken = await result.user.getIdToken();
-
-      // Send the token to our backend
-      const response = await fetch('/api/auth/google', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: idToken }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to authenticate with the server');
-      }
-
-      const userData = await response.json();
-      toast({
-        title: "Success",
-        description: "Successfully signed in with Google",
-      });
-
-      setLocation("/");
+      await signInWithRedirect(auth, googleProvider);
+      // The page will redirect to Google sign-in
+      // After sign-in, Firebase will redirect back to our app
     } catch (error: any) {
       toast({
         title: "Error",
