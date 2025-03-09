@@ -50,7 +50,7 @@ export default function JournalDetail() {
       // Update the cache immediately
       queryClient.setQueryData(["/api/journals"], (old: any) => {
         if (!old) return old;
-        return old.map((j: Journal) => 
+        return old.map((j: Journal) =>
           j.id === Number(id)
             ? { ...j, likeCount: data.likeCount, hasLiked: true }
             : j
@@ -114,9 +114,9 @@ export default function JournalDetail() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
       <article className="max-w-3xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <h1 className="text-2xl md:text-4xl font-bold text-foreground">{journal.title}</h1>
           {user?.isAdmin && (
             <div className="flex items-center gap-2">
@@ -137,7 +137,7 @@ export default function JournalDetail() {
           )}
         </div>
 
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6 md:mb-8">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-8">
           <time>{format(new Date(journal.createdAt), "MMMM d, yyyy")}</time>
           <Button
             variant="ghost"
@@ -148,7 +148,7 @@ export default function JournalDetail() {
             onClick={() => likeMutation.mutate()}
             disabled={likeMutation.isPending}
           >
-            <Heart 
+            <Heart
               className={`h-4 w-4 ${likeMutation.isPending ? 'animate-pulse' : ''}`}
               fill={localHasLiked ? "currentColor" : "none"}
               stroke={localHasLiked ? "none" : "currentColor"}
@@ -158,25 +158,29 @@ export default function JournalDetail() {
         </div>
 
         {journal.imageUrl && (
-          <img
-            src={journal.imageUrl}
-            alt={journal.title}
-            className="w-full aspect-square object-cover rounded-lg mb-6 md:mb-8 max-w-[300px] md:max-w-[400px]"
-          />
+          <div className="flex justify-center mb-8">
+            <img
+              src={journal.imageUrl}
+              alt={journal.title}
+              className="w-full aspect-square object-cover rounded-lg max-w-[300px] md:max-w-[400px]"
+            />
+          </div>
         )}
 
-        <div className="prose prose-lg max-w-none mb-8 md:mb-12">
+        <div className="prose prose-lg max-w-none mb-12">
           {journal.content.split("\n").map((paragraph, index) => (
-            <p key={index} className="text-base md:text-lg text-foreground/90 leading-relaxed">{paragraph}</p>
+            <p key={index} className="text-base md:text-lg text-foreground/90 leading-relaxed text-center">
+              {paragraph}
+            </p>
           ))}
         </div>
 
         {journal.videoUrl && (
-          <div className="w-full max-w-3xl mx-auto mb-8">
+          <div className="w-full max-w-2xl mx-auto mb-8">
             <div className="relative w-full aspect-video">
               <iframe
-                src={journal.videoUrl.includes('youtube.com') ? 
-                  journal.videoUrl.replace('watch?v=', 'embed/') : 
+                src={journal.videoUrl.includes('youtube.com') ?
+                  journal.videoUrl.replace('watch?v=', 'embed/') :
                   journal.videoUrl}
                 title="Video content"
                 className="absolute top-0 left-0 w-full h-full rounded-lg"
@@ -189,9 +193,9 @@ export default function JournalDetail() {
         )}
 
         {journal.refUrl && (
-          <div className="mt-4 flex items-center gap-2 text-sm mb-8">
+          <div className="mt-4 flex items-center justify-center gap-2 text-sm mb-8">
             <LinkIcon className="h-4 w-4 text-muted-foreground" />
-            <a 
+            <a
               href={journal.refUrl}
               target="_blank"
               rel="noopener noreferrer"
@@ -202,7 +206,7 @@ export default function JournalDetail() {
           </div>
         )}
 
-        <hr className="my-8 md:my-12 border-border" />
+        <hr className="my-12 border-border" />
 
         <CommentSection
           comments={comments}
