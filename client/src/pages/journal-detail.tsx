@@ -37,6 +37,12 @@ export default function JournalDetail() {
     mutationFn: async () => {
       await apiRequest("POST", `/api/journals/${id}/like`);
     },
+    onSuccess: () => {
+      // Invalidate both list queries and the current journal query
+      queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/journals/search"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}`] });
+    },
   });
 
   const commentMutation = useMutation({

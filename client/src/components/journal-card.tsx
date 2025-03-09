@@ -3,15 +3,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { Heart, MessageCircle } from "lucide-react";
 import { useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 type JournalCardProps = {
   journal: Journal;
   commentsCount: number;
-  onLike: () => void;
 };
 
-export function JournalCard({ journal, commentsCount, onLike }: JournalCardProps) {
+export function JournalCard({ journal, commentsCount }: JournalCardProps) {
   const [_, navigate] = useLocation();
+
+  const likeMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", `/api/journals/${journal.id}/like`);
+    },
+    onSuccess: () => {
+      // Invalidate both list queries and the specific journal query
+      queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/journals/search"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/journals/${journal.id}`] });
+    },
+  });
 
   return (
     <Card 
@@ -41,7 +54,7 @@ export function JournalCard({ journal, commentsCount, onLike }: JournalCardProps
 
         <div className="flex items-center gap-6 text-sm text-muted-foreground" onClick={(e) => e.stopPropagation()}>
           <button
-            onClick={onLike}
+            onClick={() => likeMutation.mutate()}
             className="flex items-center gap-1.5 hover:text-primary transition-colors"
           >
             <Heart className="h-5 w-5" />
