@@ -56,8 +56,7 @@ export class DatabaseStorage implements IStorage {
         pool: pool,
         tableName: 'session',
         createTableIfMissing: true,
-        // Reduce pruning frequency to avoid startup overhead
-        pruneSessionInterval: 60 * 60 // Prune expired sessions every hour instead of every 15 minutes
+        pruneSessionInterval: 60 * 60
       });
       console.log("PostgresSessionStore initialized successfully");
     } catch (error) {
@@ -152,26 +151,28 @@ export class DatabaseStorage implements IStorage {
     if (!ipAddress) return;
 
     // Check if the user has already liked this journal
-    const existingLike = await db
+    const existingLikes = await db
       .select()
       .from(likes)
-      .where(
-        sql`${likes.journalId} = ${journalId} AND ${likes.ipAddress} = ${ipAddress}`
-      )
+      .where(eq(likes.journalId, journalId))
+      .where(eq(likes.ipAddress, ipAddress))
       .execute();
 
-    if (existingLike.length > 0) return;
+    if (existingLikes.length > 0) return;
 
-    // Add the like
-    await db.insert(likes).values({ journalId, ipAddress });
+    // Add the like in a transaction
+    await db.transaction(async (tx) => {
+      // Insert the new like
+      await tx.insert(likes).values({ journalId, ipAddress });
 
-    // Update like count using a subquery
-    await db
-      .update(journals)
-      .set({
-        likeCount: sql`(SELECT COUNT(*) FROM ${likes} WHERE ${likes.journalId} = ${journalId})`
-      })
-      .where(eq(journals.id, journalId));
+      // Update the like count
+      await tx
+        .update(journals)
+        .set({
+          likeCount: sql`${journals.likeCount} + 1`
+        })
+        .where(eq(journals.id, journalId));
+    });
   }
 
   async searchJournals(query: string): Promise<Journal[]> {
