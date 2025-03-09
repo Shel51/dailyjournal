@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { ShareButton } from "./share-button";
 
 type JournalCardProps = {
   journal: Journal & { hasLiked: boolean };
@@ -109,6 +110,11 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
             <MessageCircle className="h-5 w-5" />
             <span className="font-medium">{commentsCount}</span>
           </div>
+
+          <ShareButton
+            title={journal.title}
+            url={`${window.location.origin}/journal/${journal.id}`}
+          />
         </div>
       </CardContent>
     </Card>

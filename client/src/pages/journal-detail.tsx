@@ -10,6 +10,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { JournalEditor } from "@/components/journal-editor";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { ShareButton } from "@/components/share-button";
 
 export default function JournalDetail() {
   const { id } = useParams();
@@ -155,6 +156,12 @@ export default function JournalDetail() {
             />
             <span>{localLikeCount}</span>
           </Button>
+
+          <ShareButton
+            title={journal.title}
+            url={window.location.href}
+            className="ml-auto"
+          />
         </div>
 
         {journal.imageUrl && (
