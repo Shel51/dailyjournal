@@ -31,6 +31,7 @@ export interface IStorage {
   getAllJournals(): Promise<Journal[]>;
   createComment(insertComment: InsertComment & { authorId: number }): Promise<Comment>;
   getCommentsByJournalId(journalId: number): Promise<Comment[]>;
+  getAllComments(): Promise<Comment[]>;
   addLike(journalId: number, ipAddress: string): Promise<void>;
   searchJournals(query: string): Promise<Journal[]>;
   updateJournal(id: number, journal: InsertJournal & { authorId: number }): Promise<Journal>;
@@ -115,6 +116,14 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(comments)
       .where(eq(comments.journalId, journalId))
+      .orderBy(sql`${comments.createdAt} DESC`)
+      .execute();
+  }
+
+  async getAllComments(): Promise<Comment[]> {
+    return await db
+      .select()
+      .from(comments)
       .orderBy(sql`${comments.createdAt} DESC`)
       .execute();
   }

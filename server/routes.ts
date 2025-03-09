@@ -188,6 +188,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendStatus(200);
   });
 
+  // Add this new route for fetching all comments
+  app.get("/api/comments", async (_req, res) => {
+    const comments = await storage.getAllComments();
+    res.json(comments);
+  });
+
   // File upload route with improved error handling
   app.post("/api/upload", upload.single("image"), async (req, res) => {
     try {

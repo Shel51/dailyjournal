@@ -21,12 +21,6 @@ export default function JournalFeed() {
     queryKey: ["/api/comments"],
   });
 
-  const likeMutation = useMutation({
-    mutationFn: async (journalId: number) => {
-      await apiRequest("POST", `/api/journals/${journalId}/like`);
-    },
-  });
-
   const getCommentCount = (journalId: number) => {
     return comments.filter((comment) => comment.journalId === journalId).length;
   };
@@ -63,7 +57,6 @@ export default function JournalFeed() {
             key={journal.id}
             journal={journal}
             commentsCount={getCommentCount(journal.id)}
-            onLike={() => likeMutation.mutate(journal.id)}
           />
         ))}
       </div>
