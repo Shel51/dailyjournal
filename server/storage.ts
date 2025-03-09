@@ -35,6 +35,9 @@ export interface IStorage {
   addLike(journalId: number, ipAddress: string): Promise<void>;
   searchJournals(query: string): Promise<Journal[]>;
   updateJournal(id: number, journal: InsertJournal & { authorId: number }): Promise<Journal>;
+  getComment(id: number): Promise<Comment | undefined>;
+  deleteComment(id: number): Promise<void>;
+  updateComment(id: number, data: { content: string }): Promise<Comment>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -191,6 +194,35 @@ export class DatabaseStorage implements IStorage {
       .where(eq(journals.id, id))
       .returning();
     return updatedJournal;
+  }
+
+  async getComment(id: number): Promise<Comment | undefined> {
+    const [comment] = await db
+      .select({
+        id: comments.id,
+        content: comments.content,
+        journalId: comments.journalId,
+        authorId: comments.authorId,
+        createdAt: comments.createdAt,
+        username: users.username
+      })
+      .from(comments)
+      .leftJoin(users, eq(comments.authorId, users.id))
+      .where(eq(comments.id, id));
+    return comment;
+  }
+
+  async deleteComment(id: number): Promise<void> {
+    await db.delete(comments).where(eq(comments.id, id));
+  }
+
+  async updateComment(id: number, data: { content: string }): Promise<Comment> {
+    const [comment] = await db
+      .update(comments)
+      .set(data)
+      .where(eq(comments.id, id))
+      .returning();
+    return comment;
   }
 }
 

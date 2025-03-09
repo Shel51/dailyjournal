@@ -194,6 +194,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(comments);
   });
 
+  // Add these routes before the file upload route
+  app.delete("/api/comments/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
+
+    const comment = await storage.getComment(parseInt(req.params.id));
+    if (!comment) {
+      return res.sendStatus(404);
+    }
+
+    // Only allow users to delete their own comments or admin to delete any comment
+    if (comment.authorId !== req.user.id && !req.user.isAdmin) {
+      return res.sendStatus(403);
+    }
+
+    await storage.deleteComment(parseInt(req.params.id));
+    res.sendStatus(200);
+  });
+
+  app.patch("/api/comments/:id", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
+
+    const comment = await storage.getComment(parseInt(req.params.id));
+    if (!comment) {
+      return res.sendStatus(404);
+    }
+
+    // Only allow users to edit their own comments
+    if (comment.authorId !== req.user.id) {
+      return res.sendStatus(403);
+    }
+
+    const parseResult = insertCommentSchema.pick({ content: true }).safeParse(req.body);
+    if (!parseResult.success) {
+      return res.status(400).json(parseResult.error);
+    }
+
+    const updatedComment = await storage.updateComment(parseInt(req.params.id), parseResult.data);
+    res.json(updatedComment);
+  });
+
   // File upload route with improved error handling
   app.post("/api/upload", upload.single("image"), async (req, res) => {
     try {
