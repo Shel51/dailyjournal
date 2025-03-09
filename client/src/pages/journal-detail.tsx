@@ -118,7 +118,7 @@ export default function JournalDetail() {
     <div className="min-h-screen bg-background/50">
       <div className="container mx-auto px-4 py-12 max-w-3xl">
         <article className="bg-background rounded-lg shadow-sm border border-border/50">
-          <div className="px-6 md:px-8 pt-8">
+          <div className="px-4 md:px-6 pt-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <h1 className="text-2xl md:text-3xl lg:text-4xl font-serif tracking-tight text-foreground">
                 {journal.title}
@@ -185,7 +185,7 @@ export default function JournalDetail() {
 
             <div className="prose prose-lg max-w-none mb-12">
               {journal.content.split("\n").map((paragraph, index) => (
-                <p key={index} className="mb-6 text-base md:text-lg text-foreground/90 leading-relaxed text-left px-6 md:px-8 font-normal">
+                <p key={index} className="mb-6 text-base md:text-lg text-foreground/90 leading-relaxed text-left px-2 md:px-4 font-normal">
                   {paragraph}
                 </p>
               ))}
@@ -225,7 +225,7 @@ export default function JournalDetail() {
 
           <hr className="my-8 border-border/50" />
 
-          <div className="px-6 md:px-8 pb-8">
+          <div className="px-4 md:px-6 pb-8">
             <CommentSection
               comments={comments}
               journalId={journal.id}
