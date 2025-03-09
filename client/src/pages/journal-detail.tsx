@@ -135,7 +135,7 @@ export default function JournalDetail() {
             variant="ghost"
             size="sm"
             className={`flex items-center gap-1.5 transition-colors ${
-              journal.hasLiked ? 'text-primary' : 'hover:text-primary'
+              journal.hasLiked ? 'text-red-500' : 'hover:text-red-500'
             }`}
             onClick={() => likeMutation.mutate()}
             disabled={likeMutation.isPending}

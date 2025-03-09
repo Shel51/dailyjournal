@@ -69,7 +69,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
           <button
             onClick={handleLike}
             className={`flex items-center gap-1.5 transition-colors ${
-              journal.hasLiked ? 'text-primary' : 'hover:text-primary'
+              journal.hasLiked ? 'text-red-500' : 'hover:text-red-500'
             }`}
             disabled={likeMutation.isPending}
           >
