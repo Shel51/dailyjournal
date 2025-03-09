@@ -19,28 +19,6 @@ import {
 
 const PostgresSessionStore = connectPg(session);
 
-export interface IStorage {
-  sessionStore: session.Store;
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(insertUser: InsertUser & { isAdmin?: boolean }): Promise<User>;
-  getAllUsers(): Promise<User[]>;
-  updateUserPassword(userId: number, newPassword: string): Promise<void>;
-  createJournal(insertJournal: InsertJournal & { authorId: number }): Promise<Journal>;
-  getJournal(id: number): Promise<Journal | undefined>;
-  getAllJournals(): Promise<Journal[]>;
-  createComment(insertComment: InsertComment & { authorId: number }): Promise<Comment>;
-  getCommentsByJournalId(journalId: number): Promise<Comment[]>;
-  getAllComments(): Promise<Comment[]>;
-  addLike(journalId: number, ipAddress: string): Promise<void>;
-  searchJournals(query: string): Promise<Journal[]>;
-  updateJournal(id: number, journal: InsertJournal & { authorId: number }): Promise<Journal>;
-  getComment(id: number): Promise<Comment | undefined>;
-  deleteComment(id: number): Promise<void>;
-  updateComment(id: number, data: { content: string }): Promise<Comment>;
-  deleteJournal(id: number): Promise<void>;
-}
-
 export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
 
@@ -97,16 +75,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getJournal(id: number): Promise<Journal | undefined> {
-    const [journal] = await db.select().from(journals).where(eq(journals.id, id));
-    return journal;
+    try {
+      const [result] = await db
+        .select()
+        .from(journals)
+        .where(eq(journals.id, id));
+      return result;
+    } catch (error) {
+      console.error("Error in getJournal:", error);
+      throw error;
+    }
   }
 
   async getAllJournals(): Promise<Journal[]> {
-    return await db
-      .select()
-      .from(journals)
-      .orderBy(sql`${journals.createdAt} DESC`)
-      .execute();
+    try {
+      const result = await db
+        .select()
+        .from(journals)
+        .orderBy(sql`${journals.createdAt} DESC`);
+      return result;
+    } catch (error) {
+      console.error("Error in getAllJournals:", error);
+      throw error;
+    }
   }
 
   async createComment(insertComment: InsertComment & { authorId: number }): Promise<Comment> {
@@ -242,6 +233,20 @@ export class DatabaseStorage implements IStorage {
     await db.delete(likes).where(eq(likes.journalId, id));
     // Finally delete the journal itself
     await db.delete(journals).where(eq(journals.id, id));
+  }
+
+  async hasLiked(journalId: number, ipAddress: string): Promise<boolean> {
+    try {
+      const [like] = await db
+        .select()
+        .from(likes)
+        .where(eq(likes.journalId, journalId))
+        .where(eq(likes.ipAddress, ipAddress));
+      return !!like;
+    } catch (error) {
+      console.error("Error in hasLiked:", error);
+      return false;
+    }
   }
 }
 

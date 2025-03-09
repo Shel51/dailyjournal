@@ -8,7 +8,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 type JournalCardProps = {
-  journal: Journal;
+  journal: Journal & { hasLiked: boolean }; // Added hasLiked property
   commentsCount: number;
 };
 
@@ -24,12 +24,6 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
       // Invalidate queries to trigger refetch
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${journal.id}`] });
       queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
-
-      // Immediately refetch the data
-      queryClient.refetchQueries({ 
-        queryKey: ["/api/journals"],
-        type: 'active',
-      });
     },
     onError: (error) => {
       toast({
@@ -74,10 +68,15 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
         <div className="flex items-center gap-4 md:gap-6 text-sm text-muted-foreground" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={handleLike}
-            className="flex items-center gap-1.5 hover:text-primary transition-colors"
+            className={`flex items-center gap-1.5 transition-colors ${
+              journal.hasLiked ? 'text-primary' : 'hover:text-primary'
+            }`}
             disabled={likeMutation.isPending}
           >
-            <Heart className={`h-4 w-4 md:h-5 md:w-5 ${likeMutation.isPending ? 'animate-pulse' : ''}`} />
+            <Heart 
+              className={`h-4 w-4 md:h-5 md:w-5 ${likeMutation.isPending ? 'animate-pulse' : ''}`}
+              fill={journal.hasLiked ? "currentColor" : "none"}
+            />
             <span>{journal.likeCount}</span>
           </button>
 

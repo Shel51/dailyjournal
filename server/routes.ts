@@ -83,9 +83,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Journal routes
-  app.get("/api/journals", async (_req, res) => {
+  app.get("/api/journals", async (req, res) => {
     const journals = await storage.getAllJournals();
-    res.json(journals);
+    const ipAddress = req.ip || req.socket.remoteAddress || 'unknown';
+
+    // Add hasLiked status for each journal
+    const journalsWithLikeStatus = await Promise.all(
+      journals.map(async (journal) => ({
+        ...journal,
+        hasLiked: await storage.hasLiked(journal.id, ipAddress)
+      }))
+    );
+
+    res.json(journalsWithLikeStatus);
   });
 
   app.get("/api/journals/search", async (req, res) => {
@@ -98,7 +108,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/journals/:id", async (req, res) => {
     const journal = await storage.getJournal(parseInt(req.params.id));
     if (!journal) return res.sendStatus(404);
-    res.json(journal);
+
+    const ipAddress = req.ip || req.socket.remoteAddress || 'unknown';
+    const hasLiked = await storage.hasLiked(journal.id, ipAddress);
+
+    res.json({
+      ...journal,
+      hasLiked
+    });
   });
 
   app.post("/api/journals", async (req, res) => {

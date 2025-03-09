@@ -134,11 +134,16 @@ export default function JournalDetail() {
           <Button
             variant="ghost"
             size="sm"
-            className="flex items-center gap-1.5 hover:text-primary transition-colors"
+            className={`flex items-center gap-1.5 transition-colors ${
+              journal.hasLiked ? 'text-primary' : 'hover:text-primary'
+            }`}
             onClick={() => likeMutation.mutate()}
             disabled={likeMutation.isPending}
           >
-            <Heart className={`h-4 w-4 ${likeMutation.isPending ? 'animate-pulse' : ''}`} />
+            <Heart 
+              className={`h-4 w-4 ${likeMutation.isPending ? 'animate-pulse' : ''}`}
+              fill={journal.hasLiked ? "currentColor" : "none"}
+            />
             <span>{journal.likeCount}</span>
           </Button>
         </div>
