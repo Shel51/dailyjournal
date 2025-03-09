@@ -114,12 +114,10 @@ export default function JournalDetail() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
+    <div className="container mx-auto px-4 py-8">
       <article className="max-w-3xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <h1 className="text-3xl md:text-4xl font-serif tracking-tight text-foreground leading-tight">
-            {journal.title}
-          </h1>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <h1 className="text-2xl md:text-4xl font-bold text-foreground">{journal.title}</h1>
           {user?.isAdmin && (
             <div className="flex items-center gap-2">
               <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
@@ -139,53 +137,49 @@ export default function JournalDetail() {
           )}
         </div>
 
-        <div className="flex items-center gap-4 text-sm text-muted-foreground/80 mb-8">
-          <time className="font-medium">{format(new Date(journal.createdAt), "MMMM d, yyyy")}</time>
+        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6 md:mb-8">
+          <time>{format(new Date(journal.createdAt), "MMMM d, yyyy")}</time>
           <Button
             variant="ghost"
             size="sm"
-            className={`flex items-center gap-1.5 transition-colors focus-ring rounded-full ${
+            className={`flex items-center gap-1.5 transition-colors ${
               localHasLiked ? 'text-red-500' : 'hover:text-red-500'
             }`}
             onClick={() => likeMutation.mutate()}
             disabled={likeMutation.isPending}
           >
             <Heart 
-              className={`h-4 w-4 transition-transform duration-300 ${likeMutation.isPending ? 'animate-pulse' : ''} ${
-                localHasLiked ? 'scale-110 fill-current' : 'scale-100'
-              }`}
+              className={`h-4 w-4 ${likeMutation.isPending ? 'animate-pulse' : ''}`}
+              fill={localHasLiked ? "currentColor" : "none"}
+              stroke={localHasLiked ? "none" : "currentColor"}
             />
-            <span className="font-medium">{localLikeCount}</span>
+            <span>{localLikeCount}</span>
           </Button>
         </div>
 
         {journal.imageUrl && (
-          <div className="mb-8 overflow-hidden rounded-lg bg-muted/30">
-            <img
-              src={journal.imageUrl}
-              alt={journal.title}
-              className="w-full aspect-video object-cover"
-            />
-          </div>
+          <img
+            src={journal.imageUrl}
+            alt={journal.title}
+            className="w-full aspect-square object-cover rounded-lg mb-6 md:mb-8 max-w-[300px] md:max-w-[400px]"
+          />
         )}
 
-        <div className="space-y-6 mb-12">
+        <div className="prose prose-lg max-w-none mb-8 md:mb-12">
           {journal.content.split("\n").map((paragraph, index) => (
-            <p key={index} className="text-base md:text-lg text-foreground/90 leading-relaxed tracking-wide font-normal">
-              {paragraph}
-            </p>
+            <p key={index} className="text-base md:text-lg text-foreground/90 leading-relaxed">{paragraph}</p>
           ))}
         </div>
 
         {journal.videoUrl && (
           <div className="w-full max-w-3xl mx-auto mb-8">
-            <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+            <div className="relative w-full aspect-video">
               <iframe
                 src={journal.videoUrl.includes('youtube.com') ? 
                   journal.videoUrl.replace('watch?v=', 'embed/') : 
                   journal.videoUrl}
                 title="Video content"
-                className="absolute top-0 left-0 w-full h-full"
+                className="absolute top-0 left-0 w-full h-full rounded-lg"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -201,14 +195,14 @@ export default function JournalDetail() {
               href={journal.refUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline focus-ring rounded-sm px-1"
+              className="text-primary hover:underline"
             >
               Reference Link
             </a>
           </div>
         )}
 
-        <hr className="my-12 border-border/50" />
+        <hr className="my-8 md:my-12 border-border" />
 
         <CommentSection
           comments={comments}
