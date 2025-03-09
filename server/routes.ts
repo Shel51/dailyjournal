@@ -1,9 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth } from "./auth";
+import { setupAuth, hashPassword, comparePasswords } from "./auth"; // Import comparePasswords function as well
 import { insertJournalSchema, insertCommentSchema } from "@shared/schema";
-import { hashPassword } from "./auth"; // Import hashPassword function
 
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -126,6 +125,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const journalId = parseInt(req.params.id);
     const ipAddress = req.ip;
     await storage.addLike(journalId, ipAddress);
+    res.sendStatus(200);
+  });
+
+  app.post("/api/user/change-password", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    // Verify current password
+    const user = await storage.getUser(req.user.id);
+    if (!user || !(await comparePasswords(currentPassword, user.password))) {
+      return res.status(400).send("Current password is incorrect");
+    }
+
+    // Update password
+    const hashedPassword = await hashPassword(newPassword);
+    await storage.updateUserPassword(user.id, hashedPassword);
+
     res.sendStatus(200);
   });
 

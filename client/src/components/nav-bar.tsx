@@ -2,6 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { UserCircle, LogOut } from "lucide-react";
 import { Link } from "wouter";
+import { ChangePasswordDialog } from "./change-password-dialog";
 
 export function NavBar() {
   const { user, logoutMutation } = useAuth();
@@ -24,6 +25,7 @@ export function NavBar() {
               <span className="font-medium text-primary">Admin Account</span>
             </div>
           )}
+          {user.isAdmin && <ChangePasswordDialog />}
           <Button 
             variant="ghost" 
             size="sm"

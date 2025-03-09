@@ -25,6 +25,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(insertUser: InsertUser & { isAdmin?: boolean }): Promise<User>;
   getAllUsers(): Promise<User[]>;
+  updateUserPassword(userId: number, newPassword: string): Promise<void>;
   createJournal(insertJournal: InsertJournal & { authorId: number }): Promise<Journal>;
   getJournal(id: number): Promise<Journal | undefined>;
   getAllJournals(): Promise<Journal[]>;
@@ -38,20 +39,32 @@ export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
 
   constructor() {
+    console.log("Initializing DatabaseStorage...");
     if (!process.env.DATABASE_URL) {
       throw new Error("DATABASE_URL not set");
     }
-    this.sessionStore = new PostgresSessionStore({
-      pool: pool,
-      tableName: 'session',
-      createTableIfMissing: true,
-      pruneSessionInterval: 60 * 15 // Prune expired sessions every 15 minutes
-    });
+
+    try {
+      console.log("Setting up PostgresSessionStore...");
+      this.sessionStore = new PostgresSessionStore({
+        pool: pool,
+        tableName: 'session',
+        createTableIfMissing: true,
+        // Reduce pruning frequency to avoid startup overhead
+        pruneSessionInterval: 60 * 60 // Prune expired sessions every hour instead of every 15 minutes
+      });
+      console.log("PostgresSessionStore initialized successfully");
+    } catch (error) {
+      console.error("Failed to initialize PostgresSessionStore:", error);
+      throw error;
+    }
   }
 
   async getUser(id: number): Promise<User | undefined> {
     try {
+      console.log(`Fetching user with ID: ${id}`);
       const [user] = await db.select().from(users).where(eq(users.id, id));
+      console.log(`User fetch result:`, user ? 'Found' : 'Not found');
       return user;
     } catch (error) {
       console.error('Error fetching user:', error);
@@ -136,6 +149,13 @@ export class DatabaseStorage implements IStorage {
       .where(sql`LOWER(title) LIKE ${searchQuery} OR LOWER(content) LIKE ${searchQuery}`)
       .orderBy(sql`${journals.createdAt} DESC`)
       .execute();
+  }
+
+  async updateUserPassword(userId: number, newPassword: string): Promise<void> {
+    await db
+      .update(users)
+      .set({ password: newPassword })
+      .where(eq(users.id, userId));
   }
 }
 
