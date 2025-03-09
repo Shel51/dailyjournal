@@ -151,7 +151,8 @@ export class DatabaseStorage implements IStorage {
     if (!ipAddress) return;
 
     try {
-      // Use a transaction to ensure atomicity
+      console.log(`Adding like for journal ${journalId} from IP ${ipAddress}`);
+
       await db.transaction(async (tx) => {
         // Check if like exists first
         const [existingLike] = await tx
@@ -161,20 +162,30 @@ export class DatabaseStorage implements IStorage {
           .where(eq(likes.ipAddress, ipAddress));
 
         if (!existingLike) {
-          // Add new like
-          await tx.insert(likes).values({ journalId, ipAddress });
+          console.log('No existing like found, adding new like');
 
-          // Increment the like count directly
+          // First insert the like
+          await tx.insert(likes).values({ journalId, ipAddress });
+          console.log('Like inserted successfully');
+
+          // Then update the journal's like count
           await tx
             .update(journals)
             .set({
-              likeCount: sql`${journals.likeCount} + 1`
+              likeCount: (qb) =>
+                qb.select(sql`count(*)`).from(likes).where(eq(likes.journalId, journalId))
             })
             .where(eq(journals.id, journalId));
+
+          console.log('Like count updated');
+        } else {
+          console.log('Like already exists for this IP and journal');
         }
       });
+
+      console.log('Transaction completed successfully');
     } catch (error) {
-      console.error('Error adding like:', error);
+      console.error('Error in addLike:', error);
       throw error;
     }
   }

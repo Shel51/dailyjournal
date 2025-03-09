@@ -21,10 +21,15 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
       await apiRequest("POST", `/api/journals/${journal.id}/like`);
     },
     onSuccess: () => {
-      // Force refetch to ensure we get the latest count
+      // Invalidate and refetch to ensure we get the latest data
       queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${journal.id}`] });
-      queryClient.refetchQueries({ queryKey: ["/api/journals"] });
+
+      // Force an immediate refetch
+      queryClient.refetchQueries({ 
+        queryKey: ["/api/journals"],
+        exact: true 
+      });
     },
     onError: (error) => {
       toast({
