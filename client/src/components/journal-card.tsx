@@ -55,6 +55,11 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
     },
   });
 
+  const handleNavigate = () => {
+    window.scrollTo(0, 0); // Scroll to top before navigation
+    navigate(`/journal/${journal.id}`);
+  };
+
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!likeMutation.isPending) {
@@ -65,7 +70,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
   return (
     <Card 
       className="group relative overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer border border-border/50 bg-gradient-to-b from-background/50 to-background hover:from-background/80 hover:to-background"
-      onClick={() => navigate(`/journal/${journal.id}`)}
+      onClick={handleNavigate}
     >
       <CardHeader className="pb-3">
         <CardTitle className="text-xl md:text-2xl font-lora tracking-tight">{journal.title}</CardTitle>
