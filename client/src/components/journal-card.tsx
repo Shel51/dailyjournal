@@ -19,7 +19,6 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
       await apiRequest("POST", `/api/journals/${journal.id}/like`);
     },
     onSuccess: () => {
-      // Invalidate both list queries and the specific journal query
       queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
       queryClient.invalidateQueries({ queryKey: ["/api/journals/search"] });
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${journal.id}`] });
@@ -32,37 +31,37 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
       onClick={() => navigate(`/journal/${journal.id}`)}
     >
       <CardHeader className="pb-3">
-        <CardTitle className="text-2xl font-serif">{journal.title}</CardTitle>
+        <CardTitle className="text-xl md:text-2xl font-serif">{journal.title}</CardTitle>
         <p className="text-sm text-muted-foreground mt-2">
           {format(new Date(journal.createdAt), "MMMM d, yyyy")}
         </p>
       </CardHeader>
       <CardContent>
-        <p className="line-clamp-3 text-base text-muted-foreground leading-relaxed mb-6">
+        <p className="line-clamp-3 text-sm md:text-base text-muted-foreground leading-relaxed mb-4 md:mb-6">
           {journal.content}
         </p>
 
         {journal.imageUrl && (
-          <div className="mb-6">
+          <div className="mb-4 md:mb-6">
             <img
               src={journal.imageUrl}
               alt={journal.title}
-              className="w-full aspect-square object-cover rounded-md max-w-[300px]"
+              className="w-full aspect-square object-cover rounded-md max-w-[200px] md:max-w-[300px]"
             />
           </div>
         )}
 
-        <div className="flex items-center gap-6 text-sm text-muted-foreground" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-4 md:gap-6 text-sm text-muted-foreground" onClick={(e) => e.stopPropagation()}>
           <button
             onClick={() => likeMutation.mutate()}
             className="flex items-center gap-1.5 hover:text-primary transition-colors"
           >
-            <Heart className="h-5 w-5" />
+            <Heart className="h-4 w-4 md:h-5 md:w-5" />
             <span>{journal.likeCount}</span>
           </button>
 
           <div className="flex items-center gap-1.5">
-            <MessageCircle className="h-5 w-5" />
+            <MessageCircle className="h-4 w-4 md:h-5 md:w-5" />
             <span>{commentsCount}</span>
           </div>
         </div>

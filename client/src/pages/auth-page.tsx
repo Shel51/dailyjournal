@@ -51,11 +51,11 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen grid md:grid-cols-2">
-      <div className="flex items-center justify-center p-8">
+      <div className="flex items-center justify-center p-4 md:p-8">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle>Welcome to My Journal</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl md:text-3xl">Welcome to My Journal</CardTitle>
+            <CardDescription className="text-base md:text-lg">
               Sign in to continue or create a new account.
             </CardDescription>
           </CardHeader>
@@ -67,7 +67,7 @@ export default function AuthPage() {
               </AlertDescription>
             </Alert>
 
-            <Tabs defaultValue="register">
+            <Tabs defaultValue="register" className="space-y-4">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
                 <TabsTrigger value="register">Register</TabsTrigger>

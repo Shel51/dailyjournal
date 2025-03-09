@@ -89,8 +89,8 @@ export default function JournalDetail() {
   return (
     <div className="container mx-auto px-4 py-8">
       <article className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-4xl font-bold">{journal.title}</h1>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <h1 className="text-2xl md:text-4xl font-bold">{journal.title}</h1>
           {user?.isAdmin && (
             <div className="flex items-center gap-2">
               <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
@@ -110,7 +110,7 @@ export default function JournalDetail() {
           )}
         </div>
 
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-8">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6 md:mb-8">
           <time>{format(new Date(journal.createdAt), "MMMM d, yyyy")}</time>
           <Button
             variant="ghost"
@@ -127,12 +127,12 @@ export default function JournalDetail() {
           <img
             src={journal.imageUrl}
             alt={journal.title}
-            className="w-full aspect-square object-cover rounded-lg mb-8 max-w-[400px]"
+            className="w-full aspect-square object-cover rounded-lg mb-6 md:mb-8 max-w-[300px] md:max-w-[400px]"
           />
         )}
 
         {journal.videoUrl && (
-          <div className="aspect-video mb-8">
+          <div className="aspect-video mb-6 md:mb-8">
             <iframe
               src={journal.videoUrl}
               className="w-full h-full rounded-lg"
@@ -142,13 +142,13 @@ export default function JournalDetail() {
           </div>
         )}
 
-        <div className="prose prose-lg max-w-none mb-12 text-white/90">
+        <div className="prose prose-lg max-w-none mb-8 md:mb-12 text-white/90">
           {journal.content.split("\n").map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
+            <p key={index} className="text-base md:text-lg">{paragraph}</p>
           ))}
         </div>
 
-        <hr className="my-12" />
+        <hr className="my-8 md:my-12" />
 
         <CommentSection
           comments={comments}

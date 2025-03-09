@@ -30,23 +30,23 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-2xl mx-auto text-center mb-16">
-          <h1 className="text-4xl font-bold mb-4">My Daily Journal</h1>
-          <p className="text-xl text-muted-foreground mb-8">
+      <div className="container mx-auto px-4 py-8 md:py-16">
+        <div className="max-w-2xl mx-auto text-center mb-8 md:mb-16">
+          <h1 className="text-3xl md:text-4xl font-bold mb-4">My Daily Journal</h1>
+          <p className="text-lg md:text-xl text-muted-foreground mb-6 md:mb-8 leading-relaxed">
             There are moments that slip through our fingers like grains of sand—unnoticed, unspoken. And then there are reflections that linger, refusing to fade into the hum of routine. Here, I pause. I listen and give them a place to rest.
           </p>
           {user?.isAdmin && (
-            <Button asChild className="bg-primary hover:bg-primary/90 text-2xl font-bold p-4 rounded-lg">
+            <Button asChild className="bg-primary hover:bg-primary/90 text-xl md:text-2xl font-bold p-3 md:p-4 rounded-lg">
               <Link href="/today">
-                <PencilLine className="mr-2 h-6 w-6" />
+                <PencilLine className="mr-2 h-5 w-5 md:h-6 md:w-6" />
                 Today's thought
               </Link>
             </Button>
           )}
         </div>
 
-        <div className="max-w-2xl mx-auto space-y-8">
+        <div className="max-w-3xl mx-auto space-y-6">
           {journals.map((journal) => (
             <JournalCard
               key={journal.id}
