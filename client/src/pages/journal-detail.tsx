@@ -51,9 +51,10 @@ export default function JournalDetail() {
       await apiRequest("POST", `/api/journals/${id}/like`);
     },
     onSuccess: () => {
-      // Update both list and detail view
+      // Force refetch to ensure we get the latest count
       queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}`] });
+      queryClient.refetchQueries({ queryKey: [`/api/journals/${id}`] });
     },
     onError: (error: Error) => {
       toast({

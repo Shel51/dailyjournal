@@ -164,17 +164,11 @@ export class DatabaseStorage implements IStorage {
           // Add new like
           await tx.insert(likes).values({ journalId, ipAddress });
 
-          // Get current like count
-          const [currentJournal] = await tx
-            .select({ likeCount: journals.likeCount })
-            .from(journals)
-            .where(eq(journals.id, journalId));
-
-          // Update the journal's like count
+          // Increment the like count directly
           await tx
             .update(journals)
             .set({
-              likeCount: (currentJournal?.likeCount || 0) + 1
+              likeCount: sql`${journals.likeCount} + 1`
             })
             .where(eq(journals.id, journalId));
         }
