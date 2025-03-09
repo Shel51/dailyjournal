@@ -18,14 +18,17 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
 
   const likeMutation = useMutation({
     mutationFn: async () => {
+      console.log('[LIKE] Sending like request for journal:', journal.id);
       await apiRequest("POST", `/api/journals/${journal.id}/like`);
     },
     onSuccess: () => {
+      console.log('[LIKE] Like request successful, clearing cache');
       // Clear cache for all journal-related queries
       queryClient.removeQueries({ queryKey: ["/api/journals"] });
       queryClient.removeQueries({ queryKey: [`/api/journals/${journal.id}`] });
 
       // Force immediate refetch
+      console.log('[LIKE] Triggering refetch');
       queryClient.refetchQueries({ 
         queryKey: ["/api/journals"],
         type: 'active',
@@ -33,6 +36,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
       });
     },
     onError: (error) => {
+      console.error('[LIKE] Like request failed:', error);
       toast({
         title: "Error",
         description: "Failed to like the journal entry",
@@ -44,6 +48,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!likeMutation.isPending) {
+      console.log('[LIKE] Like button clicked for journal:', journal.id);
       likeMutation.mutate();
     }
   };

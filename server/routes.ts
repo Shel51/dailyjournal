@@ -84,18 +84,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Journal routes
   app.get("/api/journals", async (req, res) => {
-    const journals = await storage.getAllJournals();
-    const ipAddress = req.ip || req.socket.remoteAddress || 'unknown';
+    try {
+      const journals = await storage.getAllJournals();
+      const ipAddress = req.ip || req.socket.remoteAddress || 'unknown';
 
-    // Add hasLiked status for each journal
-    const journalsWithLikeStatus = await Promise.all(
-      journals.map(async (journal) => ({
-        ...journal,
-        hasLiked: await storage.hasLiked(journal.id, ipAddress)
-      }))
-    );
+      // Add hasLiked status for each journal
+      const journalsWithLikeStatus = await Promise.all(
+        journals.map(async (journal) => ({
+          ...journal,
+          hasLiked: await storage.hasLiked(journal.id, ipAddress)
+        }))
+      );
 
-    res.json(journalsWithLikeStatus);
+      res.json(journalsWithLikeStatus);
+    } catch (error) {
+      console.error('Error fetching journals:', error);
+      res.status(500).json({ error: 'Failed to fetch journals' });
+    }
   });
 
   app.get("/api/journals/search", async (req, res) => {
@@ -106,16 +111,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/journals/:id", async (req, res) => {
-    const journal = await storage.getJournal(parseInt(req.params.id));
-    if (!journal) return res.sendStatus(404);
+    try {
+      const journal = await storage.getJournal(parseInt(req.params.id));
+      if (!journal) return res.sendStatus(404);
 
-    const ipAddress = req.ip || req.socket.remoteAddress || 'unknown';
-    const hasLiked = await storage.hasLiked(journal.id, ipAddress);
+      const ipAddress = req.ip || req.socket.remoteAddress || 'unknown';
+      const hasLiked = await storage.hasLiked(journal.id, ipAddress);
 
-    res.json({
-      ...journal,
-      hasLiked
-    });
+      res.json({
+        ...journal,
+        hasLiked
+      });
+    } catch (error) {
+      console.error('Error fetching journal:', error);
+      res.status(500).json({ error: 'Failed to fetch journal' });
+    }
   });
 
   app.post("/api/journals", async (req, res) => {
@@ -194,10 +204,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/journals/:id/like", async (req, res) => {
-    const journalId = parseInt(req.params.id);
-    const ipAddress = req.ip || req.socket.remoteAddress || 'unknown';
-    await storage.addLike(journalId, ipAddress);
-    res.sendStatus(200);
+    try {
+      const journalId = parseInt(req.params.id);
+      const ipAddress = req.ip || req.socket.remoteAddress || 'unknown';
+
+      await storage.addLike(journalId, ipAddress);
+      res.sendStatus(200);
+    } catch (error) {
+      console.error('Error adding like:', error);
+      res.status(500).json({ error: 'Failed to add like' });
+    }
   });
 
   app.post("/api/user/change-password", async (req, res) => {

@@ -11,7 +11,6 @@ import {
   type User,
   type Journal,
   type Comment,
-  type Like,
   type InsertUser,
   type InsertJournal,
   type InsertComment,
@@ -142,8 +141,17 @@ export class DatabaseStorage implements IStorage {
     if (!ipAddress) return;
 
     try {
-      console.log(`Adding like for journal ${journalId} from IP ${ipAddress}`);
+      console.log(`[LIKE] Starting like operation for journal ${journalId} from IP ${ipAddress}`);
 
+      // First check the current like count
+      const [journal] = await db
+        .select()
+        .from(journals)
+        .where(eq(journals.id, journalId));
+
+      console.log(`[LIKE] Current like count for journal ${journalId}: ${journal?.likeCount}`);
+
+      // Use a transaction to ensure atomicity
       await db.transaction(async (tx) => {
         // Check if like exists first
         const [existingLike] = await tx
@@ -152,33 +160,59 @@ export class DatabaseStorage implements IStorage {
           .where(eq(likes.journalId, journalId))
           .where(eq(likes.ipAddress, ipAddress));
 
+        console.log(`[LIKE] Existing like check result:`, existingLike ? 'Found' : 'Not found');
+
         if (!existingLike) {
           // First insert the like
-          await tx.insert(likes).values({ journalId, ipAddress });
+          const [insertedLike] = await tx
+            .insert(likes)
+            .values({ journalId, ipAddress })
+            .returning();
+
+          console.log(`[LIKE] Inserted new like:`, insertedLike);
 
           // Then increment the like count
-          await tx
+          const [updatedJournal] = await tx
             .update(journals)
-            .set({
-              likeCount: sql`${journals.likeCount} + 1`
-            })
-            .where(eq(journals.id, journalId));
+            .set({ likeCount: sql`${journals.likeCount} + 1` })
+            .where(eq(journals.id, journalId))
+            .returning();
+
+          console.log(`[LIKE] Updated journal like count:`, updatedJournal?.likeCount);
+        } else {
+          console.log(`[LIKE] Like already exists for journal ${journalId} from IP ${ipAddress}`);
         }
       });
+
+      // Verify the final like count
+      const [finalJournal] = await db
+        .select()
+        .from(journals)
+        .where(eq(journals.id, journalId));
+
+      console.log(`[LIKE] Final like count for journal ${journalId}: ${finalJournal?.likeCount}`);
     } catch (error) {
-      console.error('Error in addLike:', error);
+      console.error('[LIKE] Error in addLike:', error);
       throw error;
     }
   }
 
-  async searchJournals(query: string): Promise<Journal[]> {
-    const searchQuery = `%${query.toLowerCase()}%`;
-    return await db
-      .select()
-      .from(journals)
-      .where(sql`LOWER(title) LIKE ${searchQuery} OR LOWER(content) LIKE ${searchQuery}`)
-      .orderBy(sql`${journals.createdAt} DESC`)
-      .execute();
+  async hasLiked(journalId: number, ipAddress: string): Promise<boolean> {
+    try {
+      console.log(`[LIKE] Checking if IP ${ipAddress} has liked journal ${journalId}`);
+      const [like] = await db
+        .select()
+        .from(likes)
+        .where(eq(likes.journalId, journalId))
+        .where(eq(likes.ipAddress, ipAddress));
+
+      const hasLiked = !!like;
+      console.log(`[LIKE] Has liked status for journal ${journalId}: ${hasLiked}`);
+      return hasLiked;
+    } catch (error) {
+      console.error("[LIKE] Error in hasLiked:", error);
+      return false;
+    }
   }
 
   async updateUserPassword(userId: number, newPassword: string): Promise<void> {
@@ -235,18 +269,14 @@ export class DatabaseStorage implements IStorage {
     await db.delete(journals).where(eq(journals.id, id));
   }
 
-  async hasLiked(journalId: number, ipAddress: string): Promise<boolean> {
-    try {
-      const [like] = await db
-        .select()
-        .from(likes)
-        .where(eq(likes.journalId, journalId))
-        .where(eq(likes.ipAddress, ipAddress));
-      return !!like;
-    } catch (error) {
-      console.error("Error in hasLiked:", error);
-      return false;
-    }
+  async searchJournals(query: string): Promise<Journal[]> {
+    const searchQuery = `%${query.toLowerCase()}%`;
+    return await db
+      .select()
+      .from(journals)
+      .where(sql`LOWER(title) LIKE ${searchQuery} OR LOWER(content) LIKE ${searchQuery}`)
+      .orderBy(sql`${journals.createdAt} DESC`)
+      .execute();
   }
 }
 

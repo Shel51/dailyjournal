@@ -21,6 +21,12 @@ export const journals = pgTable("journals", {
   likeCount: integer("like_count").notNull().default(0),
 });
 
+export const likes = pgTable("likes", {
+  id: serial("id").primaryKey(),
+  journalId: integer("journal_id").notNull(),
+  ipAddress: text("ip_address").notNull(),
+});
+
 export const comments = pgTable("comments", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
@@ -29,12 +35,7 @@ export const comments = pgTable("comments", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const likes = pgTable("likes", {
-  id: serial("id").primaryKey(),
-  journalId: integer("journal_id").notNull(),
-  ipAddress: text("ip_address").notNull(),
-});
-
+// Create schemas for insert operations
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -53,10 +54,12 @@ export const insertCommentSchema = createInsertSchema(comments).pick({
   journalId: true,
 });
 
+// Define types for database operations
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertJournal = z.infer<typeof insertJournalSchema>;
 export type InsertComment = z.infer<typeof insertCommentSchema>;
 
+// Define types for database records
 export type User = typeof users.$inferSelect;
 export type Journal = typeof journals.$inferSelect & {
   hasLiked?: boolean;
