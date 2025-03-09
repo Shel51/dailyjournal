@@ -116,8 +116,8 @@ export default function JournalDetail() {
 
   return (
     <div className="min-h-screen bg-background/50">
-      <div className="container mx-auto py-12 max-w-3xl">
-        <article>
+      <div className="container mx-auto py-12">
+        <article className="max-w-3xl mx-auto px-4 md:px-6">
           <div className="mb-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif tracking-tight text-foreground">
