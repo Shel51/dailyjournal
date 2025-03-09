@@ -11,7 +11,6 @@ import { JournalEditor } from "@/components/journal-editor";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { ShareButton } from "@/components/share-button";
-import { TextToSpeech } from "@/components/text-to-speech";
 
 export default function JournalDetail() {
   const { id } = useParams();
@@ -145,7 +144,6 @@ export default function JournalDetail() {
 
             <div className="flex items-center gap-4 text-base text-muted-foreground/80 mb-8 font-medium">
               <time>{format(new Date(journal.createdAt), "MMMM d, yyyy")}</time>
-              <TextToSpeech text={journal.content} />
               <Button
                 variant="ghost"
                 size="sm"
@@ -178,7 +176,7 @@ export default function JournalDetail() {
                   className="w-full aspect-square object-cover rounded-lg max-w-[300px] md:max-w-[400px] shadow-md"
                 />
                 {journal.imageSubtext && (
-                  <p className="mt-3 text-sm text-muted-foreground/80 italic text-center max-w-[80%]">
+                  <p className="mt-3 text-xs text-muted-foreground/80 italic text-center max-w-[80%]">
                     {journal.imageSubtext}
                   </p>
                 )}
