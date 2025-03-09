@@ -3,9 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { Heart, MessageCircle } from "lucide-react";
 import { useLocation } from "wouter";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 type JournalCardProps = {
   journal: Journal & { hasLiked: boolean };
@@ -15,28 +16,26 @@ type JournalCardProps = {
 export function JournalCard({ journal, commentsCount }: JournalCardProps) {
   const [_, navigate] = useLocation();
   const { toast } = useToast();
+  const [localLikeCount, setLocalLikeCount] = useState(journal.likeCount);
+  const [localHasLiked, setLocalHasLiked] = useState(journal.hasLiked);
+  const queryClient = useQueryClient();
 
   const likeMutation = useMutation({
     mutationFn: async () => {
-      console.log('[LIKE] Sending like request for journal:', journal.id);
-      await apiRequest("POST", `/api/journals/${journal.id}/like`);
+      const res = await apiRequest("POST", `/api/journals/${journal.id}/like`);
+      return await res.json();
     },
-    onSuccess: () => {
-      console.log('[LIKE] Like request successful, clearing cache');
-      // Clear cache for all journal-related queries
-      queryClient.removeQueries({ queryKey: ["/api/journals"] });
-      queryClient.removeQueries({ queryKey: [`/api/journals/${journal.id}`] });
+    onSuccess: (data) => {
+      setLocalLikeCount(data.likeCount);
+      setLocalHasLiked(data.hasLiked);
 
-      // Force immediate refetch
-      console.log('[LIKE] Triggering refetch');
-      queryClient.refetchQueries({ 
+      // Invalidate queries
+      queryClient.invalidateQueries({ 
         queryKey: ["/api/journals"],
-        type: 'active',
-        exact: true,
+        exact: true 
       });
     },
-    onError: (error) => {
-      console.error('[LIKE] Like request failed:', error);
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to like the journal entry",
@@ -48,7 +47,6 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!likeMutation.isPending) {
-      console.log('[LIKE] Like button clicked for journal:', journal.id);
       likeMutation.mutate();
     }
   };
@@ -83,16 +81,16 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
           <button
             onClick={handleLike}
             className={`flex items-center gap-1.5 transition-colors ${
-              journal.hasLiked ? 'text-red-500' : 'hover:text-red-500'
+              localHasLiked ? 'text-red-500' : 'hover:text-red-500'
             }`}
             disabled={likeMutation.isPending}
           >
             <Heart 
               className={`h-4 w-4 md:h-5 md:w-5 ${likeMutation.isPending ? 'animate-pulse' : ''}`}
-              fill={journal.hasLiked ? "currentColor" : "none"}
-              stroke={journal.hasLiked ? "none" : "currentColor"}
+              fill={localHasLiked ? "currentColor" : "none"}
+              stroke={localHasLiked ? "none" : "currentColor"}
             />
-            <span>{journal.likeCount}</span>
+            <span>{localLikeCount}</span>
           </button>
 
           <div className="flex items-center gap-1.5">

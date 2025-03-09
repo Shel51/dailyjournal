@@ -137,84 +137,67 @@ export class DatabaseStorage implements IStorage {
       .execute();
   }
 
-  async addLike(journalId: number, ipAddress: string): Promise<void> {
-    if (!ipAddress) return;
-
-    try {
-      console.log(`[LIKE] Starting like operation for journal ${journalId} from IP ${ipAddress}`);
-
-      // First check the current like count
-      const [journal] = await db
-        .select()
-        .from(journals)
-        .where(eq(journals.id, journalId));
-
-      console.log(`[LIKE] Current like count for journal ${journalId}: ${journal?.likeCount}`);
-
-      // Use a transaction to ensure atomicity
-      await db.transaction(async (tx) => {
-        // Check if like exists first
-        const [existingLike] = await tx
-          .select()
-          .from(likes)
-          .where(eq(likes.journalId, journalId))
-          .where(eq(likes.ipAddress, ipAddress));
-
-        console.log(`[LIKE] Existing like check result:`, existingLike ? 'Found' : 'Not found');
-
-        if (!existingLike) {
-          // First insert the like
-          const [insertedLike] = await tx
-            .insert(likes)
-            .values({ journalId, ipAddress })
-            .returning();
-
-          console.log(`[LIKE] Inserted new like:`, insertedLike);
-
-          // Then increment the like count
-          const [updatedJournal] = await tx
-            .update(journals)
-            .set({ likeCount: sql`${journals.likeCount} + 1` })
-            .where(eq(journals.id, journalId))
-            .returning();
-
-          console.log(`[LIKE] Updated journal like count:`, updatedJournal?.likeCount);
-        } else {
-          console.log(`[LIKE] Like already exists for journal ${journalId} from IP ${ipAddress}`);
-        }
-      });
-
-      // Verify the final like count
-      const [finalJournal] = await db
-        .select()
-        .from(journals)
-        .where(eq(journals.id, journalId));
-
-      console.log(`[LIKE] Final like count for journal ${journalId}: ${finalJournal?.likeCount}`);
-    } catch (error) {
-      console.error('[LIKE] Error in addLike:', error);
-      throw error;
+  async addLike(journalId: number, ipAddress: string): Promise<{ success: boolean, likeCount: number }> {
+    if (!ipAddress) {
+      throw new Error('IP address is required');
     }
-  }
 
-  async hasLiked(journalId: number, ipAddress: string): Promise<boolean> {
-    try {
-      console.log(`[LIKE] Checking if IP ${ipAddress} has liked journal ${journalId}`);
-      const [like] = await db
+    const result = await db.transaction(async (tx) => {
+      // Get current journal state
+      const [journal] = await tx
+        .select()
+        .from(journals)
+        .where(eq(journals.id, journalId));
+
+      if (!journal) {
+        throw new Error('Journal not found');
+      }
+
+      // Check if already liked
+      const [existingLike] = await tx
         .select()
         .from(likes)
         .where(eq(likes.journalId, journalId))
         .where(eq(likes.ipAddress, ipAddress));
 
-      const hasLiked = !!like;
-      console.log(`[LIKE] Has liked status for journal ${journalId}: ${hasLiked}`);
-      return hasLiked;
-    } catch (error) {
-      console.error("[LIKE] Error in hasLiked:", error);
-      return false;
-    }
+      if (existingLike) {
+        return {
+          success: false,
+          likeCount: journal.likeCount
+        };
+      }
+
+      // Add like and update count atomically
+      await tx
+        .insert(likes)
+        .values({ journalId, ipAddress });
+
+      const [updatedJournal] = await tx
+        .update(journals)
+        .set({ likeCount: journal.likeCount + 1 })
+        .where(eq(journals.id, journalId))
+        .returning();
+
+      return {
+        success: true,
+        likeCount: updatedJournal.likeCount
+      };
+    });
+
+    return result;
   }
 
+  async hasLiked(journalId: number, ipAddress: string): Promise<boolean> {
+    if (!ipAddress) return false;
+
+    const [like] = await db
+      .select()
+      .from(likes)
+      .where(eq(likes.journalId, journalId))
+      .where(eq(likes.ipAddress, ipAddress));
+
+    return !!like;
+  }
   async updateUserPassword(userId: number, newPassword: string): Promise<void> {
     await db
       .update(users)

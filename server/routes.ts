@@ -208,8 +208,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const journalId = parseInt(req.params.id);
       const ipAddress = req.ip || req.socket.remoteAddress || 'unknown';
 
-      await storage.addLike(journalId, ipAddress);
-      res.sendStatus(200);
+      if (!journalId) {
+        return res.status(400).json({ error: 'Invalid journal ID' });
+      }
+
+      const result = await storage.addLike(journalId, ipAddress);
+
+      if (result.success) {
+        res.json({ 
+          message: 'Like added successfully',
+          likeCount: result.likeCount,
+          hasLiked: true
+        });
+      } else {
+        res.json({ 
+          message: 'Already liked',
+          likeCount: result.likeCount,
+          hasLiked: true
+        });
+      }
     } catch (error) {
       console.error('Error adding like:', error);
       res.status(500).json({ error: 'Failed to add like' });
