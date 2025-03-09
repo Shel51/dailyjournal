@@ -92,16 +92,6 @@ export default function JournalDetail() {
     },
   });
 
-  const commentMutation = useMutation({
-    mutationFn: async (content: string) => {
-      await apiRequest("POST", `/api/journals/${id}/comments`, { content });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}/comments`] });
-      queryClient.invalidateQueries({ queryKey: ["/api/comments"] });
-    },
-  });
-
   if (isLoadingJournal || isLoadingComments) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -127,7 +117,7 @@ export default function JournalDetail() {
     <div className="container mx-auto px-4 py-8">
       <article className="max-w-3xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <h1 className="text-2xl md:text-4xl font-bold">{journal.title}</h1>
+          <h1 className="text-2xl md:text-4xl font-bold text-foreground">{journal.title}</h1>
           {user?.isAdmin && (
             <div className="flex items-center gap-2">
               <Button onClick={() => setIsEditing(true)} variant="outline" size="sm">
@@ -175,9 +165,9 @@ export default function JournalDetail() {
           />
         )}
 
-        <div className="prose prose-lg max-w-none mb-8 md:mb-12 text-white/90">
+        <div className="prose prose-lg max-w-none mb-8 md:mb-12">
           {journal.content.split("\n").map((paragraph, index) => (
-            <p key={index} className="text-base md:text-lg">{paragraph}</p>
+            <p key={index} className="text-base md:text-lg text-foreground/90 leading-relaxed">{paragraph}</p>
           ))}
         </div>
 
@@ -212,12 +202,16 @@ export default function JournalDetail() {
           </div>
         )}
 
-        <hr className="my-8 md:my-12" />
+        <hr className="my-8 md:my-12 border-border" />
 
         <CommentSection
           comments={comments}
           journalId={journal.id}
-          onSubmitComment={async (content) => await commentMutation.mutateAsync(content)}
+          onSubmitComment={async (content) => {
+            const res = await apiRequest("POST", `/api/journals/${id}/comments`, { content });
+            queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}/comments`] });
+            return res;
+          }}
         />
       </article>
     </div>
