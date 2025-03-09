@@ -79,9 +79,20 @@ export default function AuthPage() {
       setLocation("/");
     } catch (error: any) {
       console.error('Google sign-in error:', error);
+      let errorMessage = 'Failed to sign in with Google';
+
+      // Handle specific Firebase auth errors
+      if (error.code === 'auth/unauthorized-domain') {
+        errorMessage = 'This domain is not authorized for sign-in. Please try again in a moment.';
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Sign-in was cancelled. Please try again.';
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        errorMessage = 'Another sign-in attempt is in progress. Please wait.';
+      }
+
       toast({
         title: "Error",
-        description: error.message || 'Failed to sign in with Google',
+        description: errorMessage,
         variant: "destructive",
       });
     }
@@ -104,8 +115,8 @@ export default function AuthPage() {
           </CardHeader>
           <CardContent>
             <div className="mb-6">
-              <Button 
-                className="w-full flex items-center justify-center gap-2" 
+              <Button
+                className="w-full flex items-center justify-center gap-2"
                 variant="outline"
                 onClick={handleGoogleSignIn}
               >
