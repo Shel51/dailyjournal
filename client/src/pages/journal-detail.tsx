@@ -51,18 +51,18 @@ export default function JournalDetail() {
       await apiRequest("POST", `/api/journals/${id}/like`);
     },
     onSuccess: () => {
-      // Invalidate and refetch to ensure we get the latest data
-      queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
+      // Invalidate queries to trigger refetch
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
 
-      // Force an immediate refetch of both queries
+      // Immediately refetch the data
       queryClient.refetchQueries({ 
         queryKey: [`/api/journals/${id}`],
-        exact: true
+        type: 'active',
       });
       queryClient.refetchQueries({ 
         queryKey: ["/api/journals"],
-        exact: true 
+        type: 'active',
       });
     },
     onError: (error: Error) => {

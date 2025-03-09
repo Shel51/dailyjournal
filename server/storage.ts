@@ -162,28 +162,18 @@ export class DatabaseStorage implements IStorage {
           .where(eq(likes.ipAddress, ipAddress));
 
         if (!existingLike) {
-          console.log('No existing like found, adding new like');
-
           // First insert the like
           await tx.insert(likes).values({ journalId, ipAddress });
-          console.log('Like inserted successfully');
 
-          // Then update the journal's like count
+          // Then increment the like count
           await tx
             .update(journals)
             .set({
-              likeCount: (qb) =>
-                qb.select(sql`count(*)`).from(likes).where(eq(likes.journalId, journalId))
+              likeCount: sql`${journals.likeCount} + 1`
             })
             .where(eq(journals.id, journalId));
-
-          console.log('Like count updated');
-        } else {
-          console.log('Like already exists for this IP and journal');
         }
       });
-
-      console.log('Transaction completed successfully');
     } catch (error) {
       console.error('Error in addLike:', error);
       throw error;
