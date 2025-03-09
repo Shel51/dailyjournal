@@ -5,6 +5,7 @@ import { Heart, MessageCircle } from "lucide-react";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 type JournalCardProps = {
   journal: Journal;
@@ -13,17 +14,30 @@ type JournalCardProps = {
 
 export function JournalCard({ journal, commentsCount }: JournalCardProps) {
   const [_, navigate] = useLocation();
+  const { toast } = useToast();
 
   const likeMutation = useMutation({
     mutationFn: async () => {
       await apiRequest("POST", `/api/journals/${journal.id}/like`);
     },
     onSuccess: () => {
-      // Invalidate both the journals list and the specific journal
+      // Update both list and detail view
       queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${journal.id}`] });
     },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to like the journal entry",
+        variant: "destructive",
+      });
+    },
   });
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    likeMutation.mutate();
+  };
 
   return (
     <Card 
@@ -53,7 +67,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
 
         <div className="flex items-center gap-4 md:gap-6 text-sm text-muted-foreground" onClick={(e) => e.stopPropagation()}>
           <button
-            onClick={() => likeMutation.mutate()}
+            onClick={handleLike}
             className="flex items-center gap-1.5 hover:text-primary transition-colors"
             disabled={likeMutation.isPending}
           >

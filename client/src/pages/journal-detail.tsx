@@ -9,12 +9,14 @@ import { format } from "date-fns";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { JournalEditor } from "@/components/journal-editor";
 import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
 
 export default function JournalDetail() {
   const { id } = useParams();
   const { user } = useAuth();
   const [_, navigate] = useLocation();
   const [isEditing, setIsEditing] = useState(false);
+  const { toast } = useToast();
 
   const { data: journal, isLoading: isLoadingJournal } = useQuery<Journal>({
     queryKey: [`/api/journals/${id}`],
@@ -49,9 +51,16 @@ export default function JournalDetail() {
       await apiRequest("POST", `/api/journals/${id}/like`);
     },
     onSuccess: () => {
-      // Invalidate both the journals list and the specific journal
+      // Update both list and detail view
       queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}`] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: "Failed to like the journal entry",
+        variant: "destructive",
+      });
     },
   });
 

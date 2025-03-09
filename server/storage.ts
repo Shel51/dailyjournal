@@ -150,27 +150,33 @@ export class DatabaseStorage implements IStorage {
   async addLike(journalId: number, ipAddress: string): Promise<void> {
     if (!ipAddress) return;
 
-    // Check if the user has already liked this journal
-    const [existingLike] = await db
-      .select()
-      .from(likes)
-      .where(eq(likes.journalId, journalId))
-      .where(eq(likes.ipAddress, ipAddress))
-      .execute();
+    try {
+      // Use a transaction to ensure atomicity
+      await db.transaction(async (tx) => {
+        // Check if like exists first
+        const [existingLike] = await tx
+          .select()
+          .from(likes)
+          .where(eq(likes.journalId, journalId))
+          .where(eq(likes.ipAddress, ipAddress));
 
-    if (existingLike) return;
+        if (!existingLike) {
+          // Add new like
+          await tx.insert(likes).values({ journalId, ipAddress });
 
-    // Add the like and update count in a transaction
-    await db.transaction(async (tx) => {
-      await tx.insert(likes).values({ journalId, ipAddress });
-
-      await tx
-        .update(journals)
-        .set({
-          likeCount: sql`${journals.likeCount} + 1`
-        })
-        .where(eq(journals.id, journalId));
-    });
+          // Update the journal's like count
+          await tx
+            .update(journals)
+            .set({
+              likeCount: sql`${journals.likeCount} + 1`
+            })
+            .where(eq(journals.id, journalId));
+        }
+      });
+    } catch (error) {
+      console.error('Error adding like:', error);
+      throw error;
+    }
   }
 
   async searchJournals(query: string): Promise<Journal[]> {
