@@ -49,9 +49,11 @@ export default function JournalDetail() {
       await apiRequest("POST", `/api/journals/${id}/like`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/journals/search"] });
+      // Invalidate all relevant queries to ensure counts are updated
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
+      // Force refetch the current journal to get updated like count
+      queryClient.refetchQueries({ queryKey: [`/api/journals/${id}`] });
     },
   });
 
