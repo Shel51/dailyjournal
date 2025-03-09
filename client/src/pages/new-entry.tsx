@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { JournalEditor } from "@/components/journal-editor";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { type InsertJournal } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,9 @@ export default function NewEntry() {
       await apiRequest("POST", "/api/journals", data);
     },
     onSuccess: () => {
+      // Invalidate both the journal list queries
+      queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/journals/search"] });
       setLocation("/");
     },
   });
