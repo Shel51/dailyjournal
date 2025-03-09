@@ -21,8 +21,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Info } from "lucide-react";
+//import { Alert, AlertDescription } from "@/components/ui/alert"; // Removed import
+//import { Info } from "lucide-react"; // Removed import
 
 export default function AuthPage() {
   const [_, setLocation] = useLocation();
@@ -60,13 +60,6 @@ export default function AuthPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Alert className="mb-6 bg-primary/10 border-primary">
-              <Info className="h-4 w-4" />
-              <AlertDescription>
-                The first user to register will become the admin with full access to create and manage journal entries.
-              </AlertDescription>
-            </Alert>
-
             <Tabs defaultValue="register" className="space-y-4">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="login">Login</TabsTrigger>
