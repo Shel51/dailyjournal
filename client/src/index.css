@@ -4,26 +4,48 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --background: 220 25% 97%;
+    --foreground: 220 25% 20%;
+    --card: 220 25% 99%;
+    --card-foreground: 220 25% 20%;
+    --popover: 220 25% 99%;
+    --popover-foreground: 220 25% 20%;
+    --primary: 220 90% 50%;
+    --primary-foreground: 220 25% 98%;
+    --secondary: 220 15% 93%;
+    --secondary-foreground: 220 25% 20%;
+    --muted: 220 15% 93%;
+    --muted-foreground: 220 10% 45%;
+    --accent: 220 15% 93%;
+    --accent-foreground: 220 25% 20%;
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 220 25% 98%;
+    --border: 220 15% 90%;
+    --input: 220 15% 93%;
+    --ring: 220 90% 50%;
     --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 220 25% 8%;
+    --foreground: 220 25% 90%;
+    --card: 220 25% 10%;
+    --card-foreground: 220 25% 90%;
+    --popover: 220 25% 10%;
+    --popover-foreground: 220 25% 90%;
+    --primary: 220 90% 60%;
+    --primary-foreground: 220 25% 98%;
+    --secondary: 220 15% 15%;
+    --secondary-foreground: 220 25% 90%;
+    --muted: 220 15% 15%;
+    --muted-foreground: 220 10% 70%;
+    --accent: 220 15% 15%;
+    --accent-foreground: 220 25% 90%;
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 220 25% 98%;
+    --border: 220 15% 20%;
+    --input: 220 15% 15%;
+    --ring: 220 90% 60%;
   }
 
   * {
@@ -31,8 +53,10 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/20;
+    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/10;
     text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Improved Typography */

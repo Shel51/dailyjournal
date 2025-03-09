@@ -23,14 +23,26 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
   const likeMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", `/api/journals/${journal.id}/like`);
-      return await res.json();
+      return res.json();
     },
     onSuccess: (data) => {
       setLocalLikeCount(data.likeCount);
-      setLocalHasLiked(data.hasLiked);
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/journals"],
-        exact: true 
+      setLocalHasLiked(true);
+
+      // Update the cache immediately
+      queryClient.setQueryData(["/api/journals"], (old: any) => {
+        if (!old) return old;
+        return old.map((j: Journal) => 
+          j.id === journal.id 
+            ? { ...j, likeCount: data.likeCount, hasLiked: true }
+            : j
+        );
+      });
+
+      // Also update the individual journal cache if it exists
+      queryClient.setQueryData([`/api/journals/${journal.id}`], (old: any) => {
+        if (!old) return old;
+        return { ...old, likeCount: data.likeCount, hasLiked: true };
       });
     },
     onError: () => {

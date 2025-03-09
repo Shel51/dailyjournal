@@ -38,6 +38,40 @@ export default function JournalDetail() {
     }
   }, [journal]);
 
+  const likeMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", `/api/journals/${id}/like`);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setLocalLikeCount(data.likeCount);
+      setLocalHasLiked(true);
+
+      // Update the cache immediately
+      queryClient.setQueryData(["/api/journals"], (old: any) => {
+        if (!old) return old;
+        return old.map((j: Journal) => 
+          j.id === Number(id)
+            ? { ...j, likeCount: data.likeCount, hasLiked: true }
+            : j
+        );
+      });
+
+      // Also update the individual journal cache
+      queryClient.setQueryData([`/api/journals/${id}`], (old: any) => {
+        if (!old) return old;
+        return { ...old, likeCount: data.likeCount, hasLiked: true };
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to like the journal entry",
+        variant: "destructive",
+      });
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: async () => {
       await apiRequest("DELETE", `/api/journals/${id}`);
@@ -55,30 +89,6 @@ export default function JournalDetail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}`] });
       setIsEditing(false);
-    },
-  });
-
-  const likeMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest("POST", `/api/journals/${id}/like`);
-      return await res.json();
-    },
-    onSuccess: (data) => {
-      setLocalLikeCount(data.likeCount);
-      setLocalHasLiked(data.hasLiked);
-
-      // Invalidate queries
-      queryClient.invalidateQueries({ 
-        queryKey: ["/api/journals"],
-        exact: true 
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to like the journal entry",
-        variant: "destructive",
-      });
     },
   });
 
