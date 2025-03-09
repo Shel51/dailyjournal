@@ -7,17 +7,6 @@ import multer from "multer";
 import path from "path";
 import fs from "fs/promises";
 import express from 'express';
-import { getAuth } from "firebase-admin/auth";
-import { initializeApp, cert } from "firebase-admin/app";
-
-// Initialize Firebase Admin
-initializeApp({
-  credential: cert({
-    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  }),
-});
 
 // Set up multer for handling file uploads
 const multerStorage = multer.diskStorage({
@@ -41,41 +30,6 @@ const upload = multer({ storage: multerStorage });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
-
-  // Add this new route for Google authentication
-  app.post("/api/auth/google", async (req, res) => {
-    try {
-      const { token } = req.body;
-
-      // Verify the Firebase token
-      const decodedToken = await getAuth().verifyIdToken(token);
-
-      // Get or create user in our database
-      let user = await storage.getUserByEmail(decodedToken.email);
-
-      if (!user) {
-        // Create new user
-        user = await storage.createUser({
-          username: decodedToken.email,
-          email: decodedToken.email,
-          password: '', // We don't need password for Google auth
-          isAdmin: false,
-        });
-      }
-
-      // Log the user in
-      req.login(user, (err) => {
-        if (err) {
-          console.error('Login error:', err);
-          return res.status(500).json({ error: 'Failed to login' });
-        }
-        res.json(user);
-      });
-    } catch (error) {
-      console.error('Google auth error:', error);
-      res.status(401).json({ error: 'Authentication failed' });
-    }
-  });
 
   // Create seed data route
   app.post("/api/seed", async (_req, res) => {

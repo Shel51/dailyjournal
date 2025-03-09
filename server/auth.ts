@@ -6,12 +6,23 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import { getAuth } from "firebase-admin/auth";
+import { initializeApp, cert } from "firebase-admin/app";
 
 declare global {
   namespace Express {
     interface User extends SelectUser {}
   }
 }
+
+// Initialize Firebase Admin
+initializeApp({
+  credential: cert({
+    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  }),
+});
 
 const scryptAsync = promisify(scrypt);
 
@@ -56,6 +67,42 @@ export function setupAuth(app: Express) {
   passport.deserializeUser(async (id: number, done) => {
     const user = await storage.getUser(id);
     done(null, user);
+  });
+
+  // Handle Google authentication
+  app.post("/api/auth/google", async (req, res) => {
+    try {
+      const { token } = req.body;
+      const decodedToken = await getAuth().verifyIdToken(token);
+
+      if (!decodedToken.email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      let user = await storage.getUserByEmail(decodedToken.email);
+
+      if (!user) {
+        // Create new user with email as username if not exists
+        const username = decodedToken.email.split('@')[0];
+        user = await storage.createUser({
+          username,
+          email: decodedToken.email,
+          password: await hashPassword(randomBytes(32).toString('hex')),
+          isAdmin: false,
+        });
+      }
+
+      req.login(user, (err) => {
+        if (err) {
+          console.error('Login error:', err);
+          return res.status(500).json({ error: 'Failed to login' });
+        }
+        res.json(user);
+      });
+    } catch (error) {
+      console.error('Google auth error:', error);
+      res.status(401).json({ error: 'Authentication failed' });
+    }
   });
 
   app.post("/api/register", async (req, res, next) => {
