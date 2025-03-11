@@ -6,7 +6,7 @@ import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShareButton } from "./share-button";
 
 type JournalCardProps = {
@@ -21,32 +21,35 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
   const [localHasLiked, setLocalHasLiked] = useState(journal.hasLiked);
   const queryClient = useQueryClient();
 
+  // Update local state when journal prop changes
+  useEffect(() => {
+    setLocalLikeCount(journal.likeCount);
+    setLocalHasLiked(journal.hasLiked);
+  }, [journal.likeCount, journal.hasLiked]);
+
   const likeMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", `/api/journals/${journal.id}/like`);
       return res.json();
     },
+    onMutate: async () => {
+      // Optimistic update
+      setLocalLikeCount(prev => prev + 1);
+      setLocalHasLiked(true);
+    },
     onSuccess: (data) => {
+      // Set the actual server value
       setLocalLikeCount(data.likeCount);
       setLocalHasLiked(true);
 
-      // Update the cache immediately
-      queryClient.setQueryData(["/api/journals"], (old: any) => {
-        if (!old) return old;
-        return old.map((j: Journal) => 
-          j.id === journal.id 
-            ? { ...j, likeCount: data.likeCount, hasLiked: true }
-            : j
-        );
-      });
-
-      // Also update the individual journal cache if it exists
-      queryClient.setQueryData([`/api/journals/${journal.id}`], (old: any) => {
-        if (!old) return old;
-        return { ...old, likeCount: data.likeCount, hasLiked: true };
-      });
+      // Update the cache
+      queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/journals/${journal.id}`] });
     },
-    onError: () => {
+    onError: (error) => {
+      // Revert optimistic update on error
+      setLocalLikeCount(journal.likeCount);
+      setLocalHasLiked(journal.hasLiked);
       toast({
         title: "Error",
         description: "Failed to like the journal entry",
@@ -62,7 +65,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!likeMutation.isPending) {
+    if (!likeMutation.isPending && !localHasLiked) {
       likeMutation.mutate();
     }
   };
@@ -99,7 +102,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
             className={`flex items-center gap-2 transition-colors duration-300 ${
               localHasLiked ? 'text-red-500' : 'hover:text-red-500'
             }`}
-            disabled={likeMutation.isPending}
+            disabled={likeMutation.isPending || localHasLiked}
           >
             <Heart 
               className={`h-5 w-5 transition-all duration-300 ${likeMutation.isPending ? 'animate-pulse' : ''} ${

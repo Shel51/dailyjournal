@@ -1,4 +1,4 @@
-import { useState, useEffect as ReactuseEffect } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
 import { type Journal, type Comment } from "@shared/schema";
@@ -32,39 +32,38 @@ export default function JournalDetail() {
   const [localHasLiked, setLocalHasLiked] = useState(journal?.hasLiked ?? false);
 
   // Update local state when journal data changes
-  ReactuseEffect(() => {
+  useEffect(() => {
     if (journal) {
       setLocalLikeCount(journal.likeCount);
-      setLocalHasLiked(journal.hasLiked || false);
+      setLocalHasLiked(journal.hasLiked);
     }
-  }, [journal]);
+  }, [journal?.likeCount, journal?.hasLiked]);
 
   const likeMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", `/api/journals/${id}/like`);
       return res.json();
     },
+    onMutate: async () => {
+      // Optimistic update
+      setLocalLikeCount(prev => prev + 1);
+      setLocalHasLiked(true);
+    },
     onSuccess: (data) => {
+      // Set the actual server value
       setLocalLikeCount(data.likeCount);
       setLocalHasLiked(true);
 
-      // Update the cache immediately
-      queryClient.setQueryData(["/api/journals"], (old: any) => {
-        if (!old) return old;
-        return old.map((j: Journal) =>
-          j.id === Number(id)
-            ? { ...j, likeCount: data.likeCount, hasLiked: true }
-            : j
-        );
-      });
-
-      // Also update the individual journal cache
-      queryClient.setQueryData([`/api/journals/${id}`], (old: any) => {
-        if (!old) return old;
-        return { ...old, likeCount: data.likeCount, hasLiked: true };
-      });
+      // Update both the list and detail cache
+      queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/journals/${id}`] });
     },
     onError: () => {
+      // Revert optimistic update on error
+      if (journal) {
+        setLocalLikeCount(journal.likeCount);
+        setLocalHasLiked(journal.hasLiked);
+      }
       toast({
         title: "Error",
         description: "Failed to like the journal entry",
@@ -150,8 +149,8 @@ export default function JournalDetail() {
                 className={`flex items-center gap-1.5 transition-colors ${
                   localHasLiked ? "text-red-500" : "hover:text-red-500"
                 }`}
-                onClick={() => likeMutation.mutate()}
-                disabled={likeMutation.isPending}
+                onClick={() => !localHasLiked && likeMutation.mutate()}
+                disabled={likeMutation.isPending || localHasLiked}
               >
                 <Heart
                   className={`h-4 w-4 ${likeMutation.isPending ? "animate-pulse" : ""}`}
