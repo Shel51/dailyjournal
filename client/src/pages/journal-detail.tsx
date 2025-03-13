@@ -11,6 +11,7 @@ import { JournalEditor } from "@/components/journal-editor";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { ShareButton } from "@/components/share-button";
+import { updateMetaTags } from "@/lib/meta-tags";
 
 export default function JournalDetail() {
   const { id } = useParams();
@@ -38,6 +39,20 @@ export default function JournalDetail() {
       setLocalHasLiked(journal.hasLiked);
     }
   }, [journal?.likeCount, journal?.hasLiked]);
+
+  useEffect(() => {
+    if (journal) {
+      const url = window.location.href;
+      const description = journal.content.slice(0, 200) + (journal.content.length > 200 ? '...' : '');
+
+      updateMetaTags({
+        title: `${journal.title} | Shally's Journal`,
+        description,
+        image: journal.imageUrl,
+        url,
+      });
+    }
+  }, [journal]);
 
   const likeMutation = useMutation({
     mutationFn: async () => {
