@@ -20,6 +20,7 @@ export default function JournalDetail() {
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [imageError, setImageError] = useState(false);
 
   const { data: journal, isLoading: isLoadingJournal } = useQuery<Journal>({
     queryKey: [`/api/journals/${id}`],
@@ -107,6 +108,10 @@ export default function JournalDetail() {
     },
   });
 
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   if (isLoadingJournal || isLoadingComments) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -182,12 +187,13 @@ export default function JournalDetail() {
               />
             </div>
 
-            {journal.imageUrl && (
+            {journal.imageUrl && !imageError && (
               <div className="flex flex-col items-center mb-10">
                 <img
                   src={journal.imageUrl}
                   alt={journal.title}
                   className="w-full aspect-square object-cover rounded-lg max-w-[300px] md:max-w-[400px] shadow-md"
+                  onError={handleImageError}
                 />
                 {journal.imageSubtext && (
                   <p className="mt-3 text-xs text-muted-foreground/80 italic text-center max-w-[80%]">
