@@ -36,10 +36,10 @@ async function uploadImage(file: File): Promise<string> {
     }
 
     const data = await res.json();
-    console.log("Upload response:", data); // Debug log
+    console.log("Upload response:", data);
     return data.url;
   } catch (error) {
-    console.error("Upload error:", error); // Debug log
+    console.error("Upload error:", error);
     throw error;
   }
 }
@@ -47,7 +47,9 @@ async function uploadImage(file: File): Promise<string> {
 export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(defaultValues?.imageUrl || null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    defaultValues?.imagePath ? `${window.location.origin}/${defaultValues.imagePath}` : null
+  );
   const { toast } = useToast();
 
   const form = useForm({
@@ -55,7 +57,7 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
     defaultValues: defaultValues || {
       title: "",
       content: "",
-      imageUrl: "",
+      imagePath: "",
       imageSubtext: "",
       videoUrl: "",
       refUrl: "",
@@ -66,11 +68,9 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedImage(file);
-      // Create a preview URL for the selected image
       const preview = URL.createObjectURL(file);
       setPreviewUrl(preview);
-      // Clear the imageUrl field since we're uploading a new image
-      form.setValue("imageUrl", "");
+      form.setValue("imagePath", "");
     }
   };
 
@@ -78,11 +78,10 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
     try {
       setIsSubmitting(true);
 
-      // If there's a new image selected, upload it first
       if (selectedImage) {
-        const imageUrl = await uploadImage(selectedImage);
-        console.log("Uploaded image URL:", imageUrl); // Debug log
-        data.imageUrl = imageUrl;
+        const imagePath = await uploadImage(selectedImage);
+        console.log("Uploaded image path:", imagePath);
+        data.imagePath = imagePath;
       }
 
       await onSubmit(data);
@@ -94,7 +93,7 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
         description: "Journal entry saved successfully",
       });
     } catch (error) {
-      console.error("Submit error:", error); // Debug log
+      console.error("Submit error:", error);
       toast({
         title: "Error",
         description: "Failed to save journal entry",
@@ -193,20 +192,6 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
               </div>
             )}
           </div>
-
-          <FormField
-            control={form.control}
-            name="imageUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Image URL (optional)</FormLabel>
-                <FormControl>
-                  <Input placeholder="Or enter image URL..." {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
 
         <FormField

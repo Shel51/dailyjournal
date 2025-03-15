@@ -13,7 +13,8 @@ export const journals = pgTable("journals", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   content: text("content").notNull(),
-  imageUrl: text("image_url"),
+  imagePath: text("image_path"),
+  imageSubtext: text("image_subtext"),
   videoUrl: text("video_url"),
   refUrl: text("ref_url"),
   authorId: integer("author_id").notNull(),
@@ -44,7 +45,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const insertJournalSchema = createInsertSchema(journals).pick({
   title: true,
   content: true,
-  imageUrl: true,
+  imagePath: true,
+  imageSubtext: true,
   videoUrl: true,
   refUrl: true,
 });

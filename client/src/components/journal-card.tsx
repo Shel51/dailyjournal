@@ -14,20 +14,6 @@ type JournalCardProps = {
   commentsCount: number;
 };
 
-// Handle image URL based on whether it's a full URL or relative path
-const normalizeImageUrl = (url: string | null): string | null => {
-  if (!url) return null;
-
-  // If it's already a full URL, return as is
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url;
-  }
-
-  // For uploaded images or relative paths, ensure proper URL construction
-  const cleanPath = url.replace(/^\/+/, '');
-  return `${window.location.origin}/${cleanPath}`;
-};
-
 export function JournalCard({ journal, commentsCount }: JournalCardProps) {
   const [_, navigate] = useLocation();
   const { toast } = useToast();
@@ -86,11 +72,11 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
   };
 
   const handleImageError = () => {
-    console.error('Image failed to load:', journal.imageUrl);
+    console.error('Image failed to load:', journal.imagePath);
     setImageError(true);
   };
 
-  const imageUrl = normalizeImageUrl(journal.imageUrl);
+  const imageUrl = journal.imagePath ? `${window.location.origin}/${journal.imagePath}` : null;
 
   return (
     <Card 
