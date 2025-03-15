@@ -58,11 +58,12 @@ export default function JournalDetail() {
     if (journal) {
       const url = window.location.href;
       const description = journal.content.slice(0, 200) + (journal.content.length > 200 ? '...' : '');
+      const imageUrl = normalizeImageUrl(journal.imageUrl);
 
       updateMetaTags({
         title: `${journal.title} | Shally's Journal`,
         description,
-        image: journal.imageUrl,
+        image: imageUrl,
         url,
       });
     }
