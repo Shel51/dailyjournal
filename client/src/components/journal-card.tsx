@@ -14,6 +14,19 @@ type JournalCardProps = {
   commentsCount: number;
 };
 
+// Handle image URL based on whether it's a full URL or relative path
+const normalizeImageUrl = (url: string | null): string | null => {
+  if (!url) return null;
+
+  // If it's already a full URL, return as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+
+  // Remove any leading slashes and add a single leading slash
+  return '/' + url.replace(/^\/+/, '');
+};
+
 export function JournalCard({ journal, commentsCount }: JournalCardProps) {
   const [_, navigate] = useLocation();
   const { toast } = useToast();
@@ -75,6 +88,8 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
     setImageError(true);
   };
 
+  const imageUrl = normalizeImageUrl(journal.imageUrl);
+
   return (
     <Card 
       className="group relative overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer border border-border/50 bg-gradient-to-b from-background/50 to-background hover:from-background/80 hover:to-background"
@@ -91,10 +106,10 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
           {journal.content}
         </p>
 
-        {journal.imageUrl && !imageError && (
+        {imageUrl && !imageError && (
           <div className="mb-6 overflow-hidden rounded-lg">
             <img
-              src={journal.imageUrl.startsWith('http') ? journal.imageUrl : `/${journal.imageUrl.replace(/^\//, '')}`}
+              src={imageUrl}
               alt={journal.title}
               className="w-full aspect-square object-cover transform transition-transform duration-500 group-hover:scale-105"
               onError={handleImageError}

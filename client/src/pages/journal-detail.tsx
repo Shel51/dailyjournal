@@ -13,6 +13,19 @@ import { useToast } from "@/hooks/use-toast";
 import { ShareButton } from "@/components/share-button";
 import { updateMetaTags } from "@/lib/meta-tags";
 
+// Handle image URL based on whether it's a full URL or relative path
+const normalizeImageUrl = (url: string | null): string | null => {
+  if (!url) return null;
+
+  // If it's already a full URL, return as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+
+  // Remove any leading slashes and add a single leading slash
+  return '/' + url.replace(/^\/+/, '');
+};
+
 export default function JournalDetail() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -133,6 +146,8 @@ export default function JournalDetail() {
     );
   }
 
+  const imageUrl = normalizeImageUrl(journal.imageUrl);
+
   return (
     <div className="min-h-screen bg-background/50">
       <div className="container mx-auto py-12">
@@ -187,10 +202,10 @@ export default function JournalDetail() {
               />
             </div>
 
-            {journal.imageUrl && !imageError && (
+            {imageUrl && !imageError && (
               <div className="flex flex-col items-center mb-10">
                 <img
-                  src={journal.imageUrl}
+                  src={imageUrl}
                   alt={journal.title}
                   className="w-full aspect-square object-cover rounded-lg max-w-[300px] md:max-w-[400px] shadow-md"
                   onError={handleImageError}
