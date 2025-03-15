@@ -102,6 +102,11 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
               className="w-full aspect-square object-cover transform transition-transform duration-500 group-hover:scale-105"
               onError={handleImageError}
             />
+            {journal.imageSubtext && (
+              <p className="mt-2 text-xs text-muted-foreground/80 italic text-center">
+                {journal.imageSubtext}
+              </p>
+            )}
           </div>
         )}
 
