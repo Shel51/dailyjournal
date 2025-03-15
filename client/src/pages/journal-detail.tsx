@@ -22,8 +22,8 @@ const normalizeImageUrl = (url: string | null): string | null => {
     return url;
   }
 
-  // Remove any leading slashes and add a single leading slash
-  return '/' + url.replace(/^\/+/, '');
+  // Convert relative URL to absolute URL
+  return `${window.location.origin}/${url.replace(/^\/+/, '')}`;
 };
 
 export default function JournalDetail() {
@@ -59,6 +59,8 @@ export default function JournalDetail() {
       const url = window.location.href;
       const description = journal.content.slice(0, 200) + (journal.content.length > 200 ? '...' : '');
       const imageUrl = normalizeImageUrl(journal.imageUrl);
+
+      console.log('Setting meta tags with image URL:', imageUrl); // Debug log
 
       updateMetaTags({
         title: `${journal.title} | Shally's Journal`,

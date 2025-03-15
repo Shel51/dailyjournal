@@ -60,6 +60,13 @@ export function ShareButton({ title, url, className }: ShareButtonProps) {
   const description = document.querySelector('meta[name="description"]')?.getAttribute("content") || "";
   const imageUrl = document.querySelector('meta[property="og:image"]')?.getAttribute("content");
 
+  console.log('Share preview meta tags:', { // Debug log
+    title,
+    description,
+    imageUrl,
+    url
+  });
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -78,11 +85,17 @@ export function ShareButton({ title, url, className }: ShareButtonProps) {
           <div className="text-sm font-medium mb-2">Preview</div>
           <div className="rounded-lg border overflow-hidden bg-card">
             {imageUrl && (
-              <img
-                src={imageUrl}
-                alt={title}
-                className="w-full h-32 object-cover"
-              />
+              <div className="w-full h-32 overflow-hidden">
+                <img
+                  src={imageUrl}
+                  alt={title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.error('Image failed to load:', imageUrl);
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
             )}
             <div className="p-3">
               <h3 className="text-sm font-medium line-clamp-2">{title}</h3>
