@@ -13,11 +13,11 @@ import { useToast } from "@/hooks/use-toast";
 import { ShareButton } from "@/components/share-button";
 import { updateMetaTags } from "@/lib/meta-tags";
 
-// Add helper function at the top of the file
-const getImageUrl = (url: string | null) => {
-  if (!url) return null;
+const getImageUrl = (url: string | null): string => {
+  if (!url) return '';
   if (url.startsWith('http')) return url;
-  return `/${url.replace(/^\/+/, '')}`;
+  if (url.startsWith('/')) return url;
+  return `/${url}`;
 };
 
 export default function JournalDetail() {

@@ -14,10 +14,11 @@ type JournalCardProps = {
   commentsCount: number;
 };
 
-const getImageUrl = (url: string | null) => {
-  if (!url) return null;
+const getImageUrl = (url: string | null): string => {
+  if (!url) return '';
   if (url.startsWith('http')) return url;
-  return `/${url.replace(/^\/+/, '')}`;
+  if (url.startsWith('/')) return url;
+  return `/${url}`;
 };
 
 export function JournalCard({ journal, commentsCount }: JournalCardProps) {
