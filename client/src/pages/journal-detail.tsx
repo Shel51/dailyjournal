@@ -137,8 +137,6 @@ export default function JournalDetail() {
     );
   }
 
-  const imageUrl = journal.imagePath ? `${window.location.origin}/${journal.imagePath}` : null;
-
   return (
     <div className="min-h-screen bg-background/50">
       <div className="container mx-auto py-12">
@@ -193,10 +191,10 @@ export default function JournalDetail() {
               />
             </div>
 
-            {imageUrl && !imageError && (
+            {journal.imagePath && !imageError && (
               <div className="flex flex-col items-center mb-10">
                 <img
-                  src={imageUrl}
+                  src={`${window.location.origin}/${journal.imagePath}`}
                   alt={journal.title}
                   className="w-full aspect-square object-cover rounded-lg max-w-[300px] md:max-w-[400px] shadow-md"
                   onError={handleImageError}
