@@ -22,8 +22,9 @@ const normalizeImageUrl = (url: string | null): string | null => {
     return url;
   }
 
-  // Convert relative URL to absolute URL
-  return `${window.location.origin}/${url.replace(/^\/+/, '')}`;
+  // For uploaded images or relative paths, ensure proper URL construction
+  const cleanPath = url.replace(/^\/+/, '');
+  return `${window.location.origin}/${cleanPath}`;
 };
 
 export default function JournalDetail() {
