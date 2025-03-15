@@ -26,17 +26,19 @@ async function uploadImage(file: File): Promise<string> {
   formData.append("image", file);
 
   try {
+    console.log("Starting image upload...");
     const res = await fetch("/api/upload", {
       method: "POST",
       body: formData,
     });
 
     if (!res.ok) {
+      console.error("Upload failed with status:", res.status);
       throw new Error("Failed to upload image");
     }
 
     const data = await res.json();
-    console.log("Upload response:", data);
+    console.log("Upload successful, received path:", data.url);
     return data.url;
   } catch (error) {
     console.error("Upload error:", error);
@@ -67,6 +69,7 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      console.log("Selected image:", file.name);
       setSelectedImage(file);
       const preview = URL.createObjectURL(file);
       setPreviewUrl(preview);
@@ -79,8 +82,9 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
       setIsSubmitting(true);
 
       if (selectedImage) {
+        console.log("Uploading image...");
         const imagePath = await uploadImage(selectedImage);
-        console.log("Uploaded image path:", imagePath);
+        console.log("Image uploaded successfully, path:", imagePath);
         data.imagePath = imagePath;
       }
 

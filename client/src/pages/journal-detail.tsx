@@ -13,20 +13,6 @@ import { useToast } from "@/hooks/use-toast";
 import { ShareButton } from "@/components/share-button";
 import { updateMetaTags } from "@/lib/meta-tags";
 
-// Handle image URL based on whether it's a full URL or relative path
-const normalizeImageUrl = (url: string | null): string | null => {
-  if (!url) return null;
-
-  // If it's already a full URL, return as is
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url;
-  }
-
-  // For uploaded images or relative paths, ensure proper URL construction
-  const cleanPath = url.replace(/^\/+/, '');
-  return `${window.location.origin}/${cleanPath}`;
-};
-
 export default function JournalDetail() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -59,7 +45,7 @@ export default function JournalDetail() {
     if (journal) {
       const url = window.location.href;
       const description = journal.content.slice(0, 200) + (journal.content.length > 200 ? '...' : '');
-      const imageUrl = normalizeImageUrl(journal.imageUrl);
+      const imageUrl = journal.imagePath ? `${window.location.origin}/${journal.imagePath}` : null;
 
       console.log('Setting meta tags with image URL:', imageUrl); // Debug log
 
@@ -126,7 +112,7 @@ export default function JournalDetail() {
   });
 
   const handleImageError = () => {
-    console.error('Image failed to load:', journal?.imageUrl);
+    console.error('Image failed to load:', journal?.imagePath);
     setImageError(true);
   };
 
@@ -151,7 +137,7 @@ export default function JournalDetail() {
     );
   }
 
-  const imageUrl = normalizeImageUrl(journal.imageUrl);
+  const imageUrl = journal.imagePath ? `${window.location.origin}/${journal.imagePath}` : null;
 
   return (
     <div className="min-h-screen bg-background/50">
