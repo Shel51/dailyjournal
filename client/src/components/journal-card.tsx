@@ -23,8 +23,8 @@ const normalizeImageUrl = (url: string | null): string | null => {
     return url;
   }
 
-  // Remove any leading slashes and add a single leading slash
-  return '/' + url.replace(/^\/+/, '');
+  // Convert relative URL to absolute URL
+  return `${window.location.origin}/${url.replace(/^\/+/, '')}`;
 };
 
 export function JournalCard({ journal, commentsCount }: JournalCardProps) {
@@ -79,12 +79,13 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!likeMutation.isPending && !localHasLiked) {
+    if (!localHasLiked) {
       likeMutation.mutate();
     }
   };
 
   const handleImageError = () => {
+    console.error('Image failed to load:', journal.imageUrl);
     setImageError(true);
   };
 
@@ -117,7 +118,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
           </div>
         )}
 
-        <div className="flex items-center gap-6 text-sm text-muted-foreground/70" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-6 text-sm text-muted-foreground/70">
           <button
             onClick={handleLike}
             className={`flex items-center gap-2 transition-colors duration-300 ${

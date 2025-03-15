@@ -43,8 +43,8 @@ export default function JournalDetail() {
     queryKey: [`/api/journals/${id}/comments`],
   });
 
-  const [localLikeCount, setLocalLikeCount] = useState(journal?.likeCount ?? 0);
-  const [localHasLiked, setLocalHasLiked] = useState(journal?.hasLiked ?? false);
+  const [localLikeCount, setLocalLikeCount] = useState(0);
+  const [localHasLiked, setLocalHasLiked] = useState(false);
 
   // Update local state when journal data changes
   useEffect(() => {
@@ -52,7 +52,7 @@ export default function JournalDetail() {
       setLocalLikeCount(journal.likeCount);
       setLocalHasLiked(journal.hasLiked);
     }
-  }, [journal?.likeCount, journal?.hasLiked]);
+  }, [journal]);
 
   useEffect(() => {
     if (journal) {
@@ -125,6 +125,7 @@ export default function JournalDetail() {
   });
 
   const handleImageError = () => {
+    console.error('Image failed to load:', journal?.imageUrl);
     setImageError(true);
   };
 
