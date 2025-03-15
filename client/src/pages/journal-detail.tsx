@@ -13,6 +13,13 @@ import { useToast } from "@/hooks/use-toast";
 import { ShareButton } from "@/components/share-button";
 import { updateMetaTags } from "@/lib/meta-tags";
 
+// Add helper function at the top of the file
+const getImageUrl = (url: string | null) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `/${url.replace(/^\/+/, '')}`;
+};
+
 export default function JournalDetail() {
   const { id } = useParams();
   const { user } = useAuth();
@@ -190,7 +197,7 @@ export default function JournalDetail() {
             {journal.imageUrl && !imageError && (
               <div className="flex flex-col items-center mb-10">
                 <img
-                  src={journal.imageUrl}
+                  src={getImageUrl(journal.imageUrl)}
                   alt={journal.title}
                   className="w-full aspect-square object-cover rounded-lg max-w-[300px] md:max-w-[400px] shadow-md"
                   onError={handleImageError}

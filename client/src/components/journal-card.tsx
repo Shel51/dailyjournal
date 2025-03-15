@@ -14,6 +14,12 @@ type JournalCardProps = {
   commentsCount: number;
 };
 
+const getImageUrl = (url: string | null) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `/${url.replace(/^\/+/, '')}`;
+};
+
 export function JournalCard({ journal, commentsCount }: JournalCardProps) {
   const [_, navigate] = useLocation();
   const { toast } = useToast();
@@ -94,7 +100,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
         {journal.imageUrl && !imageError && (
           <div className="mb-6 overflow-hidden rounded-lg">
             <img
-              src={journal.imageUrl.startsWith('http') ? journal.imageUrl : `/${journal.imageUrl.replace(/^\//, '')}`}
+              src={getImageUrl(journal.imageUrl)}
               alt={journal.title}
               className="w-full aspect-square object-cover transform transition-transform duration-500 group-hover:scale-105"
               onError={handleImageError}
