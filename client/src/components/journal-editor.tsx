@@ -25,17 +25,23 @@ async function uploadImage(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("image", file);
 
-  const res = await fetch("/api/upload", {
-    method: "POST",
-    body: formData,
-  });
+  try {
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
 
-  if (!res.ok) {
-    throw new Error("Failed to upload image");
+    if (!res.ok) {
+      throw new Error("Failed to upload image");
+    }
+
+    const data = await res.json();
+    console.log("Upload response:", data); // Debug log
+    return data.url;
+  } catch (error) {
+    console.error("Upload error:", error); // Debug log
+    throw error;
   }
-
-  const data = await res.json();
-  return data.url;
 }
 
 export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
@@ -60,7 +66,11 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedImage(file);
-      setPreviewUrl(URL.createObjectURL(file));
+      // Create a preview URL for the selected image
+      const preview = URL.createObjectURL(file);
+      setPreviewUrl(preview);
+      // Clear the imageUrl field since we're uploading a new image
+      form.setValue("imageUrl", "");
     }
   };
 
@@ -71,6 +81,7 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
       // If there's a new image selected, upload it first
       if (selectedImage) {
         const imageUrl = await uploadImage(selectedImage);
+        console.log("Uploaded image URL:", imageUrl); // Debug log
         data.imageUrl = imageUrl;
       }
 
@@ -83,6 +94,7 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
         description: "Journal entry saved successfully",
       });
     } catch (error) {
+      console.error("Submit error:", error); // Debug log
       toast({
         title: "Error",
         description: "Failed to save journal entry",
