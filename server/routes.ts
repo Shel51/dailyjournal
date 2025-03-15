@@ -326,7 +326,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Serve uploaded files
-  app.use("/uploads", express.static("uploads"));
+  app.use("/uploads", express.static(path.resolve("./uploads"), {
+    setHeaders: (res) => {
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+    }
+  }));
 
   const httpServer = createServer(app);
   return httpServer;

@@ -94,7 +94,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
         {journal.imageUrl && !imageError && (
           <div className="mb-6 overflow-hidden rounded-lg">
             <img
-              src={journal.imageUrl}
+              src={journal.imageUrl.startsWith('http') ? journal.imageUrl : `/${journal.imageUrl.replace(/^\//, '')}`}
               alt={journal.title}
               className="w-full aspect-square object-cover transform transition-transform duration-500 group-hover:scale-105"
               onError={handleImageError}
