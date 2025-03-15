@@ -36,4 +36,13 @@ export function updateMetaTags({
   if (absoluteImageUrl) {
     document.querySelector('meta[name="twitter:image"]')?.setAttribute("content", absoluteImageUrl);
   }
+
+  // Log meta tag updates for verification
+  console.log('Meta tags updated:', {
+    title,
+    description,
+    url,
+    originalImage: image,
+    absoluteImageUrl
+  });
 }

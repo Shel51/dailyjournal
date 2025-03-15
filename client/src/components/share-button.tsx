@@ -56,6 +56,10 @@ export function ShareButton({ title, url, className }: ShareButtonProps) {
     window.open(twitterUrl, "_blank");
   };
 
+  // Get meta tags for preview
+  const description = document.querySelector('meta[name="description"]')?.getAttribute("content") || "";
+  const imageUrl = document.querySelector('meta[property="og:image"]')?.getAttribute("content");
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -68,7 +72,30 @@ export function ShareButton({ title, url, className }: ShareButtonProps) {
           <span className="hidden sm:inline">Share</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[200px]">
+      <DropdownMenuContent align="end" className="w-[300px]">
+        {/* Preview Card */}
+        <div className="p-4 border-b">
+          <div className="text-sm font-medium mb-2">Preview</div>
+          <div className="rounded-lg border overflow-hidden bg-card">
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt={title}
+                className="w-full h-32 object-cover"
+              />
+            )}
+            <div className="p-3">
+              <h3 className="text-sm font-medium line-clamp-2">{title}</h3>
+              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                {description}
+              </p>
+              <p className="text-xs text-muted-foreground/60 mt-1 truncate">
+                {url}
+              </p>
+            </div>
+          </div>
+        </div>
+        {/* Share Options */}
         <DropdownMenuItem onClick={shareViaWebShare} className="gap-2">
           <Share2 className="h-4 w-4" />
           Share
