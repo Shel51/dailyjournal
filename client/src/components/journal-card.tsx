@@ -47,7 +47,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
       queryClient.invalidateQueries({ queryKey: [`/api/journals/${journal.id}`] });
     },
-    onError: (error) => {
+    onError: () => {
       // Revert optimistic update on error
       setLocalLikeCount(journal.likeCount);
       setLocalHasLiked(journal.hasLiked);
