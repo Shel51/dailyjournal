@@ -25,7 +25,6 @@ export const journals = pgTable("journals", {
 export const likes = pgTable("likes", {
   id: serial("id").primaryKey(),
   journalId: integer("journal_id").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const comments = pgTable("comments", {
