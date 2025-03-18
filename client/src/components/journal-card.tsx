@@ -69,6 +69,11 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
     setImageError(true);
   };
 
+  // Get the full image URL
+  const imageUrl = journal.imagePath ? 
+    (journal.imagePath.startsWith('http') ? journal.imagePath : `${window.location.origin}${journal.imagePath.startsWith('/') ? journal.imagePath : `/${journal.imagePath}`}`) 
+    : null;
+
   return (
     <Card 
       className="group relative overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer border border-border/50 bg-gradient-to-b from-background/50 to-background hover:from-background/80 hover:to-background"
@@ -85,10 +90,10 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
           {journal.content}
         </p>
 
-        {journal.imagePath && !imageError && (
+        {imageUrl && !imageError && (
           <div className="mb-6 overflow-hidden rounded-lg">
             <img
-              src={`${window.location.origin}/${journal.imagePath}`}
+              src={imageUrl}
               alt={journal.title}
               className="w-full aspect-square object-cover transform transition-transform duration-500 group-hover:scale-105"
               onError={handleImageError}

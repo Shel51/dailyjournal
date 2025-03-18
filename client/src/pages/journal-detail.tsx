@@ -31,13 +31,11 @@ export default function JournalDetail() {
   });
 
   const [localLikeCount, setLocalLikeCount] = useState(0);
-  //const [localHasLiked, setLocalHasLiked] = useState(false); // Removed as not used in the new logic
 
   // Update local state when journal data changes
   useEffect(() => {
     if (journal) {
       setLocalLikeCount(journal.likeCount);
-      //setLocalHasLiked(journal.hasLiked); // Removed as not used in the new logic
     }
   }, [journal]);
 
@@ -45,7 +43,9 @@ export default function JournalDetail() {
     if (journal) {
       const url = window.location.href;
       const description = journal.content.slice(0, 200) + (journal.content.length > 200 ? '...' : '');
-      const imageUrl = journal.imagePath ? `${window.location.origin}/${journal.imagePath}` : null;
+      const imageUrl = journal.imagePath ? 
+        (journal.imagePath.startsWith('http') ? journal.imagePath : `${window.location.origin}${journal.imagePath.startsWith('/') ? journal.imagePath : `/${journal.imagePath}`}`) 
+        : null;
 
       console.log('Setting meta tags with image URL:', imageUrl); // Debug log
 
@@ -66,12 +66,10 @@ export default function JournalDetail() {
     onMutate: async () => {
       // Optimistic update
       setLocalLikeCount(prev => prev + 1);
-      //setLocalHasLiked(true); // Removed as not needed in the new logic
     },
     onSuccess: (data) => {
       // Set the actual server value
       setLocalLikeCount(data.likeCount);
-      //setLocalHasLiked(true); // Removed as not needed in the new logic
 
       // Update both the list and detail cache
       queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
@@ -81,7 +79,6 @@ export default function JournalDetail() {
       // Revert optimistic update on error
       if (journal) {
         setLocalLikeCount(journal.likeCount);
-        //setLocalHasLiked(journal.hasLiked); // Removed as not needed in the new logic
       }
       toast({
         title: "Error",
@@ -192,7 +189,7 @@ export default function JournalDetail() {
             {journal.imagePath && !imageError && (
               <div className="flex flex-col items-center mb-10">
                 <img
-                  src={`${window.location.origin}/${journal.imagePath}`}
+                  src={journal.imagePath.startsWith('http') ? journal.imagePath : `${window.location.origin}${journal.imagePath.startsWith('/') ? journal.imagePath : `/${journal.imagePath}`}`}
                   alt={journal.title}
                   className="w-full aspect-square object-cover rounded-lg max-w-[300px] md:max-w-[400px] shadow-md"
                   onError={handleImageError}
