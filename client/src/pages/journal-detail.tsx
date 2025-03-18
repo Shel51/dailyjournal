@@ -31,13 +31,13 @@ export default function JournalDetail() {
   });
 
   const [localLikeCount, setLocalLikeCount] = useState(0);
-  const [localHasLiked, setLocalHasLiked] = useState(false);
+  //const [localHasLiked, setLocalHasLiked] = useState(false); // Removed as not used in the new logic
 
   // Update local state when journal data changes
   useEffect(() => {
     if (journal) {
       setLocalLikeCount(journal.likeCount);
-      setLocalHasLiked(journal.hasLiked);
+      //setLocalHasLiked(journal.hasLiked); // Removed as not used in the new logic
     }
   }, [journal]);
 
@@ -66,12 +66,12 @@ export default function JournalDetail() {
     onMutate: async () => {
       // Optimistic update
       setLocalLikeCount(prev => prev + 1);
-      setLocalHasLiked(true);
+      //setLocalHasLiked(true); // Removed as not needed in the new logic
     },
     onSuccess: (data) => {
       // Set the actual server value
       setLocalLikeCount(data.likeCount);
-      setLocalHasLiked(true);
+      //setLocalHasLiked(true); // Removed as not needed in the new logic
 
       // Update both the list and detail cache
       queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
@@ -81,7 +81,7 @@ export default function JournalDetail() {
       // Revert optimistic update on error
       if (journal) {
         setLocalLikeCount(journal.likeCount);
-        setLocalHasLiked(journal.hasLiked);
+        //setLocalHasLiked(journal.hasLiked); // Removed as not needed in the new logic
       }
       toast({
         title: "Error",
@@ -170,16 +170,14 @@ export default function JournalDetail() {
               <Button
                 variant="ghost"
                 size="sm"
-                className={`flex items-center gap-1.5 transition-colors ${
-                  localHasLiked ? "text-red-500" : "hover:text-red-500"
-                }`}
-                onClick={() => !localHasLiked && likeMutation.mutate()}
-                disabled={likeMutation.isPending || localHasLiked}
+                className="flex items-center gap-1.5 hover:text-red-500"
+                onClick={() => likeMutation.mutate()}
+                disabled={likeMutation.isPending}
               >
                 <Heart
                   className={`h-4 w-4 ${likeMutation.isPending ? "animate-pulse" : ""}`}
-                  fill={localHasLiked ? "currentColor" : "none"}
-                  stroke={localHasLiked ? "none" : "currentColor"}
+                  fill="none"
+                  stroke="currentColor"
                 />
                 <span>{localLikeCount}</span>
               </Button>

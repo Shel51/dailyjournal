@@ -18,15 +18,13 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
   const [_, navigate] = useLocation();
   const { toast } = useToast();
   const [localLikeCount, setLocalLikeCount] = useState(journal.likeCount);
-  const [localHasLiked, setLocalHasLiked] = useState(journal.hasLiked);
   const [imageError, setImageError] = useState(false);
   const queryClient = useQueryClient();
 
   // Update local state when journal prop changes
   useEffect(() => {
     setLocalLikeCount(journal.likeCount);
-    setLocalHasLiked(journal.hasLiked);
-  }, [journal.likeCount, journal.hasLiked]);
+  }, [journal.likeCount]);
 
   const likeMutation = useMutation({
     mutationFn: async () => {
@@ -36,12 +34,10 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
     onMutate: async () => {
       // Optimistic update
       setLocalLikeCount(prev => prev + 1);
-      setLocalHasLiked(true);
     },
     onSuccess: (data) => {
       // Set the actual server value
       setLocalLikeCount(data.likeCount);
-      setLocalHasLiked(true);
 
       // Update the cache
       queryClient.invalidateQueries({ queryKey: ["/api/journals"] });
@@ -50,7 +46,6 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
     onError: () => {
       // Revert optimistic update on error
       setLocalLikeCount(journal.likeCount);
-      setLocalHasLiked(journal.hasLiked);
       toast({
         title: "Error",
         description: "Failed to like the journal entry",
@@ -66,9 +61,7 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!localHasLiked) {
-      likeMutation.mutate();
-    }
+    likeMutation.mutate();
   };
 
   const handleImageError = () => {
@@ -112,16 +105,14 @@ export function JournalCard({ journal, commentsCount }: JournalCardProps) {
           <button
             onClick={handleLike}
             className={`flex items-center gap-2 transition-colors duration-300 ${
-              localHasLiked ? 'text-red-500' : 'hover:text-red-500'
+              localLikeCount > 0 ? 'text-red-500' : 'hover:text-red-500'
             }`}
-            disabled={likeMutation.isPending || localHasLiked}
+            disabled={likeMutation.isPending}
           >
             <Heart 
-              className={`h-5 w-5 transition-all duration-300 ${likeMutation.isPending ? 'animate-pulse' : ''} ${
-                localHasLiked ? 'scale-110' : 'scale-100'
-              }`}
-              fill={localHasLiked ? "currentColor" : "none"}
-              stroke={localHasLiked ? "none" : "currentColor"}
+              className={`h-5 w-5 transition-all duration-300 ${likeMutation.isPending ? 'animate-pulse' : ''}`}
+              fill={localLikeCount > 0 ? "currentColor" : "none"}
+              stroke={localLikeCount > 0 ? "none" : "currentColor"}
             />
             <span className="font-medium">{localLikeCount}</span>
           </button>

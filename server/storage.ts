@@ -137,11 +137,7 @@ export class DatabaseStorage implements IStorage {
       .execute();
   }
 
-  async addLike(journalId: number, ipAddress: string): Promise<{ success: boolean, likeCount: number }> {
-    if (!ipAddress) {
-      throw new Error('IP address is required');
-    }
-
+  async addLike(journalId: number): Promise<{ success: boolean, likeCount: number }> {
     const result = await db.transaction(async (tx) => {
       // Get current journal state
       const [journal] = await tx
@@ -153,24 +149,10 @@ export class DatabaseStorage implements IStorage {
         throw new Error('Journal not found');
       }
 
-      // Check if already liked
-      const [existingLike] = await tx
-        .select()
-        .from(likes)
-        .where(eq(likes.journalId, journalId))
-        .where(eq(likes.ipAddress, ipAddress));
-
-      if (existingLike) {
-        return {
-          success: false,
-          likeCount: journal.likeCount
-        };
-      }
-
       // Add like and update count atomically
       await tx
         .insert(likes)
-        .values({ journalId, ipAddress });
+        .values({ journalId });
 
       const [updatedJournal] = await tx
         .update(journals)
@@ -187,16 +169,9 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
 
-  async hasLiked(journalId: number, ipAddress: string): Promise<boolean> {
-    if (!ipAddress) return false;
-
-    const [like] = await db
-      .select()
-      .from(likes)
-      .where(eq(likes.journalId, journalId))
-      .where(eq(likes.ipAddress, ipAddress));
-
-    return !!like;
+  async hasLiked(): Promise<boolean> {
+    // Always return false to allow multiple likes
+    return false;
   }
   async updateUserPassword(userId: number, newPassword: string): Promise<void> {
     await db
