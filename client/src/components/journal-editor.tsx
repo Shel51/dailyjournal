@@ -39,7 +39,7 @@ async function uploadImage(file: File): Promise<string> {
 
     const data = await res.json();
     console.log("Upload successful, received path:", data.url);
-    return data.url;
+    return data.url.startsWith('/') ? data.url : `/${data.url}`;
   } catch (error) {
     console.error("Upload error:", error);
     throw error;
@@ -50,7 +50,11 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
-    defaultValues?.imagePath ? `${window.location.origin}/${defaultValues.imagePath}` : null
+    defaultValues?.imagePath ? 
+      (defaultValues.imagePath.startsWith('http') ? 
+        defaultValues.imagePath : 
+        `${window.location.origin}${defaultValues.imagePath.startsWith('/') ? defaultValues.imagePath : `/${defaultValues.imagePath}`}`
+      ) : null
   );
   const { toast } = useToast();
 
@@ -170,6 +174,10 @@ export function JournalEditor({ onSubmit, defaultValues }: EditorProps) {
                     src={previewUrl}
                     alt="Preview"
                     className="w-full aspect-square object-cover rounded-lg max-w-[300px]"
+                    onError={(e) => {
+                      console.error('Image preview failed to load:', previewUrl);
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
                   />
                   {form.getValues("imageSubtext") && (
                     <p className="mt-2 text-xs text-muted-foreground/80 italic text-center">
