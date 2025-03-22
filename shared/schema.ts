@@ -62,9 +62,7 @@ export type InsertComment = z.infer<typeof insertCommentSchema>;
 
 // Define types for database records
 export type User = typeof users.$inferSelect;
-export type Journal = typeof journals.$inferSelect & {
-  hasLiked?: boolean;
-};
+export type Journal = typeof journals.$inferSelect;
 export type Comment = typeof comments.$inferSelect & {
   username?: string;
 };
