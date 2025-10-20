@@ -1,5 +1,5 @@
 import serverless from "serverless-http";
-import { createApp } from "../server/app.js"; // will import the TypeScript-compiled JS
+import { createApp } from "../server/app.ts"; // <-- NOTE: .ts here is intentional
 
 let cachedHandler;
 
