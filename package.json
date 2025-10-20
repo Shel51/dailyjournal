@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
- "scripts": {
+"scripts": {
   "dev": "tsx server/index.ts",
-  "build": "vite build --no-check",
-  "check": "echo 'Type checking skipped on deploy'",
+  "build": "vite build --config vite.config.ts --no-check",
+  "check": "echo \"skipped type check\"",
   "db:push": "drizzle-kit push"
 },
   "dependencies": {
