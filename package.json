@@ -5,9 +5,12 @@
   "license": "MIT",
 "scripts": {
   "dev": "tsx server/index.ts",
-  "build": "vite build --config vite.config.ts --no-check",
+  "build": "vite build --config vite.config.ts",
   "check": "echo \"skipped type check\"",
   "db:push": "drizzle-kit push"
+},
+"engines": {
+  "node": "20.x"
 },
   "dependencies": {
     "@fontsource/lora": "^5.2.5",
